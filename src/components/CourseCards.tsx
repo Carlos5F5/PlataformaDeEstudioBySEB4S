@@ -55,7 +55,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, onSelect }) => {
             fontWeight: 'bold',
           }}
         >
-          Inscribirte ahora
+          Ver ahora
         </button>
       </div>
     </div>
