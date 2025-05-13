@@ -127,6 +127,7 @@ const App: React.FC = () => {
                 Clase seleccionada
               </h2>
               <VideoPlayer key={videoUrl} videoUrl={videoUrl} />
+
 </>
           )}
         </div>
