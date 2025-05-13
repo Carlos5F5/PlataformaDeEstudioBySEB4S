@@ -1,31 +1,25 @@
-const VideoPlayer: React.FC<{ url: string }> = ({ url }) => {
-  const isStreamtape = url.includes('streamtape.com/e/');
-  const embedUrl = isStreamtape ? url : url;
+import React from 'react';
 
-  if (!url) return null;
+interface VideoPlayerProps {
+  videoUrl: string;
+}
+
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl }) => {
+  const isIframe = videoUrl.includes("canva.com") || videoUrl.includes("streamtape.com");
 
   return (
-    <div style={{ marginTop: '40px', textAlign: 'center' }}>
-      {isStreamtape ? (
+    <div>
+      {isIframe ? (
         <iframe
-          src={embedUrl}
-          width="720"
-          height="420"
+          src={videoUrl}
+          width="100%"
+          height="600px"
+          style={{ border: 'none' }}
           allowFullScreen
-          frameBorder="0"
-          style={{ border: 'none', maxWidth: '100%' }}
-          title="Streamtape Player"
         />
       ) : (
-        <video
-          width="720"
-          height="420"
-          controls
-          autoPlay
-          preload="auto"
-          style={{ width: '100%', maxWidth: '720px', backgroundColor: 'black' }}
-        >
-          <source src={url} type="video/mp4" />
+        <video width="100%" controls>
+          <source src={videoUrl} type="video/mp4" />
           Tu navegador no soporta el video.
         </video>
       )}

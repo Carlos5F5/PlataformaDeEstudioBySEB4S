@@ -126,8 +126,8 @@ const App: React.FC = () => {
               <h2 style={{ marginTop: '30px', color: '#fff', fontSize: '24px' }}>
                 Clase seleccionada
               </h2>
-              <VideoPlayer key={videoUrl} url={videoUrl} />
-            </>
+              <VideoPlayer key={videoUrl} videoUrl={videoUrl} />
+</>
           )}
         </div>
       </div>
