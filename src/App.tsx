@@ -1,45 +1,76 @@
+// src/App.tsx
 import React, { useState } from 'react';
 import CourseCard from './components/CourseCards';
-import VideoPlayer from './components/VideoPlayer';
+import EnhancedPlayer from './components/EnhancedPlayer';
+import WriteUpsSection from './components/WriteUpsSection';
+
 import logoClase1 from './assets/logos/arquitecturadecomputadoraslogo.jpg';
 import logoClase2 from './assets/logos/Anonimato.jpg';
 import logoClase3 from './assets/logos/clasepythondesdecero.jpg';
 import logoClase4 from './assets/logos/claseredes.jpg';
 
-const App: React.FC = () => {
-  const [videoUrl, setVideoUrl] = useState('');
-  const [description, setDescription] = useState('');
+import pepehxrfondo from '/videosfondo/pepehxrfondo.mp4';
 
+const App: React.FC = () => {
+  /* -------------------- state -------------------- */
+  const [videoUrl, setVideoUrl]       = useState('');
+  const [audioUrl, setAudioUrl]       = useState('');
+  const [description, setDescription] = useState('');
+  const [useCustomAudio, setUseCustomAudio] = useState(false);
+  const [videoQuality, setVideoQuality]     = useState('auto');
+
+  /* -------------------- data --------------------- */
   const courses = [
     {
       title: 'Clase 01 - Arquitectura de Computadoras',
       image: logoClase1,
-      videoUrl: 'https://streamtape.com/e/pxodYrBooOIr69r/Clase-01.mp4',
+      videoUrl: 'https://youtu.be/WasDk4qlD1c',
+      audioUrl: '',
       description: 'Introducción básica sobre hardware y componentes.',
     },
     {
       title: 'Clase 02 - Anonimato en la red',
       image: logoClase2,
-      videoUrl: 'https://streamtape.com/e/8qPkrZdPo8SXgD/Clase-02.mp4',
+      videoUrl: 'https://youtu.be/lLMM7CdhgEk',
+      audioUrl: '',
       description: 'Uso de herramientas para navegar de forma anónima.',
     },
     {
       title: 'Clase 03 - Python desde cero',
       image: logoClase3,
-      videoUrl: 'https://streamtape.com/e/L1aWDMz6mPCRROv/Clase-03.mp4',
+      videoUrl: 'https://youtu.be/pknxAdkG5C0',
+      audioUrl: '',
       description: 'Aprende a programar desde cero usando Python.',
     },
     {
       title: 'Clase 04 - Redes y comunicaciones',
       image: logoClase4,
-      videoUrl: 'https://streamtape.com/e/Gk8wBKDKWVH1kx3/Clase-04.mp4',
+      videoUrl: 'https://youtu.be/81pVIBy66tY',
+      audioUrl: '',
       description: 'Conceptos básicos de redes y protocolos.',
     },
   ];
 
+  /* ------------- handlers ------------- */
+  const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAudioUrl(URL.createObjectURL(file));
+      setUseCustomAudio(true);
+    }
+  };
+
+  const handleQualityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setVideoQuality(e.target.value);
+  };
+
+  /* ------------- render -------------- */
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
-      {/* 🎥 Video de fondo */}
+    <div
+      className="app-container"
+      style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}
+    >
+      {/* 🎥 video de fondo */}
       <video
         autoPlay
         loop
@@ -56,33 +87,28 @@ const App: React.FC = () => {
           pointerEvents: 'none',
         }}
       >
-        <source src="/videosfondo/pepehxrfondo.mp4" type="video/mp4" />
+        <source src={pepehxrfondo} type="video/mp4" />
         Tu navegador no soporta videos HTML5.
       </video>
 
-      {/* 🌑 Capa oscura */}
+      {/* capa oscura */}
       <div
         style={{
           position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          inset: 0,
+          background: 'rgba(0,0,0,.5)',
           zIndex: 0,
           pointerEvents: 'none',
         }}
       />
 
-      {/* 🧱 Contenido principal */}
+      {/* -------------------- contenido -------------------- */}
       <div style={{ position: 'relative', zIndex: 1, padding: '40px 0' }}>
         <div
           style={{
             margin: '0 auto',
             maxWidth: '1300px',
-            width: '100%',
             padding: '0 20px',
-            boxSizing: 'border-box',
             textAlign: 'center',
           }}
         >
@@ -90,6 +116,7 @@ const App: React.FC = () => {
             Pepe el Maestro Haxor
           </h1>
 
+          {/* tarjetas de cursos */}
           <div
             style={{
               display: 'flex',
@@ -98,19 +125,15 @@ const App: React.FC = () => {
               gap: '40px',
             }}
           >
-            {courses.map((course, index) => (
-              <div
-                key={index}
-                style={{
-                  width: '260px',
-                  boxSizing: 'border-box',
-                }}
-              >
+            {courses.map((course, i) => (
+              <div key={i} style={{ width: '260px' }}>
                 <CourseCard
                   course={course}
                   onSelect={() => {
                     setVideoUrl(course.videoUrl);
+                    setAudioUrl(course.audioUrl || '');
                     setDescription(course.description);
+                    setUseCustomAudio(!!course.audioUrl);
                   }}
                 />
               </div>
@@ -121,15 +144,113 @@ const App: React.FC = () => {
             <p style={{ marginTop: '25px', color: '#ccc' }}>{description}</p>
           )}
 
+          {/* reproductor + controles */}
           {videoUrl && (
             <>
-              <h2 style={{ marginTop: '30px', color: '#fff', fontSize: '24px' }}>
-                Clase seleccionada
-              </h2>
-              <VideoPlayer key={videoUrl} videoUrl={videoUrl} />
+              {/* controles */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  flexWrap: 'wrap',
+                  gap: '20px',
+                  margin: '20px 0',
+                }}
+              >
+                {/* selector calidad */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <label style={{ color: '#fff' }}>Calidad:</label>
+                  <select
+                    value={videoQuality}
+                    onChange={handleQualityChange}
+                    style={{
+                      padding: '6px 12px',
+                      background: '#333',
+                      color: '#fff',
+                      border: '1px solid #555',
+                      borderRadius: '8px',
+                    }}
+                  >
+                    <option value="auto">Automática</option>
+                    <option value="240p">240p</option>
+                    <option value="360p">360p</option>
+                    <option value="480p">480p</option>
+                    <option value="720p">720p</option>
+                    <option value="1080p">1080p</option>
+                  </select>
+                </div>
 
-</>
+                {/* audio personalizado */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <label
+                    htmlFor="audio-upload"
+                    style={{
+                      padding: '6px 12px',
+                      background: '#444',
+                      color: '#fff',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Audio personalizado
+                  </label>
+                  <input
+                    id="audio-upload"
+                    type="file"
+                    accept="audio/*"
+                    onChange={handleAudioUpload}
+                    style={{ display: 'none' }}
+                  />
+                  {useCustomAudio && (
+                    <button
+                      onClick={() => {
+                        setUseCustomAudio(false);
+                        setAudioUrl('');
+                      }}
+                      style={{
+                        padding: '6px 12px',
+                        background: '#666',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Quitar audio
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* contenedor reproductor */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    width: '100%',
+                    maxWidth: '900px',
+                    aspectRatio: '16/9',
+                    position: 'relative',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <EnhancedPlayer
+                    videoUrl={videoUrl}
+                    audioUrl={useCustomAudio ? audioUrl : undefined}
+                    quality={videoQuality}
+                  />
+                </div>
+              </div>
+            </>
           )}
+
+          {/* --------- APARTADO WRITE-UPS --------- */}
+          <WriteUpsSection />
         </div>
       </div>
     </div>

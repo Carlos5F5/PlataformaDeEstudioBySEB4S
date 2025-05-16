@@ -1,42 +1,72 @@
+/* Estilos mejorados para la app con video de fondo */
+
+/* Asegura que el root ocupe todo el espacio disponible */
 #root {
   display: flex;
   justify-content: center;
-  padding: 2rem;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
-/* Estilos opcionales de Vite o plantillas iniciales */
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #000; /* Fondo negro como fallback */
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Clase para fijar el background video */
+.app-container {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Estilos para el video de fondo */
+.app-container video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  z-index: -1;
+  object-fit: cover;
+}
+
+/* Oculta controles del video */
+video::-webkit-media-controls {
+  display: none !important;
+}
+
+/* Animación para los elementos cuando aparecen */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Estilos responsive para asegurar que el video cubre todo el espacio */
+@media only screen and (max-width: 768px) {
+  .app-container video {
+    object-fit: cover !important;
+    height: 100vh !important;
+    width: 100vw !important;
   }
-  to {
-    transform: rotate(360deg);
-  }
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* mantiene estable el gutter del scroll en navegadores modernos */
+html {
+  scrollbar-gutter: stable;
 }
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+/* fallback universal */
+body {
+  overflow-y: scroll;
 }

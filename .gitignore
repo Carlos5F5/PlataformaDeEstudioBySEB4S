@@ -25,5 +25,7 @@ dist-ssr
 public/videos-clases/*.mp4
 node_modules/
 dist/
-public/videos-clases/*.mp4
+#public/videos-clases/*.mp4
 public/videosfondo/*.mp4
+herramientas/
+
