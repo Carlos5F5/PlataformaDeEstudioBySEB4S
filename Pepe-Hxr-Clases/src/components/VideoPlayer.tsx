@@ -8,26 +8,29 @@ interface VideoPlayerProps {
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Helpers para detectar el tipo de fuente
+  console.log('🔍 Video URL recibida:', videoUrl); // Muestra el link en consola
+
+  // Detectores de tipo de fuente
   const isHls = (url: string) => url.endsWith('.m3u8');
   const isMp4 = (url: string) => url.endsWith('.mp4');
+  const isGoogleStream = (url: string) => url.includes('googlevideo.com');
   const isVimeo = (url: string) => url.includes('vimeo.com');
   const isStreamtape = (url: string) => url.includes('streamtape.com');
   const isYouTube = (url: string) => url.includes('youtube.com') || url.includes('youtu.be');
 
-  // HLS player con hls.js
+  // Reproductor HLS.js
   useEffect(() => {
     if (videoRef.current && isHls(videoUrl) && Hls.isSupported()) {
       const hls = new Hls();
       hls.loadSource(videoUrl);
       hls.attachMedia(videoRef.current);
       return () => hls.destroy();
-    } else if (videoRef.current && videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
+    } else if (videoRef.current && isHls(videoUrl)) {
       videoRef.current.src = videoUrl;
     }
   }, [videoUrl]);
 
-  // Vimeo
+  // Opciones con iframe (solo si quieres mantenerlos)
   if (isVimeo(videoUrl)) {
     const vimeoId = videoUrl.split('/').pop();
     return (
@@ -36,82 +39,81 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl }) => {
         allow="autoplay; fullscreen"
         allowFullScreen
         title="Vimeo Video"
-        style={{
-          width: '100%',
-          height: '100%',
-          border: 0,
-          borderRadius: '12px',
-          display: 'block',
-        }}
+        style={{ width: '100%', height: '100%', border: 0, borderRadius: '12px' }}
       />
     );
   }
 
-  // YouTube
   if (isYouTube(videoUrl)) {
     const ytIdMatch = videoUrl.match(/(?:v=|youtu\.be\/)([\w-]+)/);
     const ytId = ytIdMatch ? ytIdMatch[1] : '';
     return (
       <iframe
-        src={`https://www.youtube.com/embed/${ytId}`}
+        src={`https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&showinfo=0&controls=1`}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
         title="YouTube Video"
-        style={{
-          width: '100%',
-          height: '100%',
-          border: 0,
-          borderRadius: '12px',
-          display: 'block',
-        }}
+        style={{ width: '100%', height: '100%', border: 0, borderRadius: '12px' }}
       />
     );
   }
 
-  // Streamtape
   if (isStreamtape(videoUrl)) {
     return (
       <iframe
         src={videoUrl}
         allowFullScreen
         title="Streamtape Video"
-        style={{
-          width: '100%',
-          height: '100%',
-          border: 0,
-          borderRadius: '12px',
-          display: 'block',
-        }}
+        style={{ width: '100%', height: '100%', border: 0, borderRadius: '12px' }}
       />
     );
   }
 
-  // MP4 o HLS directos
-  if (isMp4(videoUrl) || isHls(videoUrl)) {
+  // Reproductor nativo HTML5 para MP4, HLS, GoogleVideo
+  if (
+    isMp4(videoUrl) ||
+    isHls(videoUrl) ||
+    videoUrl.includes('googlevideo.com') ||
+    videoUrl.includes('videoplayback')
+  ) {
     return (
       <video
         ref={videoRef}
+        src={!isHls(videoUrl) ? videoUrl : undefined}
         controls
-        className="w-full h-full rounded-xl"
-        preload="metadata"
+        autoPlay
         playsInline
         style={{
           width: '100%',
           height: '100%',
-          borderRadius: '12px',
           backgroundColor: 'black',
+          borderRadius: '12px',
           display: 'block',
         }}
       />
     );
   }
 
-  // Si no es compatible
-  return (
-    <div style={{ color: '#fff', padding: '20px', textAlign: 'center' }}>
-      No se puede reproducir este tipo de video.
-    </div>
-  );
-};
+  // Si el tipo no es compatible
+return (
+  <video
+    ref={videoRef}
+    src={videoUrl}
+    controls
+    autoPlay
+    playsInline
+    style={{
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'black',
+      borderRadius: '12px',
+      display: 'block',
+    }}
+    onError={(e) => {
+      console.error('❌ Error al reproducir video:', e);
+    }}
+  />
+);
+}
 
 export default VideoPlayer;

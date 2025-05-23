@@ -1,5 +1,5 @@
 // src/App.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import CourseCard from './components/CourseCards';
 import EnhancedPlayer from './components/EnhancedPlayer';
 import WriteUpsSection from './components/WriteUpsSection';
@@ -9,15 +9,27 @@ import logoClase2 from './assets/logos/Anonimato.jpg';
 import logoClase3 from './assets/logos/clasepythondesdecero.jpg';
 import logoClase4 from './assets/logos/claseredes.jpg';
 
-import pepehxrfondo from '/videosfondo/pepehxrfondo.mp4';
 import './mobile-player.css';
+
 const App: React.FC = () => {
   /* -------------------- state -------------------- */
-  const [videoUrl, setVideoUrl]       = useState('');
-  const [audioUrl, setAudioUrl]       = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [audioUrl, setAudioUrl] = useState('');
   const [description, setDescription] = useState('');
   const [useCustomAudio, setUseCustomAudio] = useState(false);
-  const [videoQuality, setVideoQuality]     = useState('auto');
+  const [videoQuality, setVideoQuality] = useState('auto');
+  
+  const backgroundVideoRef = useRef<HTMLVideoElement>(null);
+
+  // Función para convertir YouTube Shorts URL a formato embebible
+  const getYouTubeVideoUrl = (url: string) => {
+    // Extraer ID del video de YouTube Shorts
+    const match = url.match(/youtube\.com\/shorts\/([^/?]+)/);
+    if (match && match[1]) {
+      return `https://www.youtube.com/embed/${match[1]}?autoplay=1&mute=1&loop=1&playlist=${match[1]}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1`;
+    }
+    return url;
+  };
 
   /* -------------------- data --------------------- */
   const courses = [
@@ -64,46 +76,91 @@ const App: React.FC = () => {
     setVideoQuality(e.target.value);
   };
 
+  // Efecto para manejar el video de fondo
+  useEffect(() => {
+    const handleVideoLoad = () => {
+      // Función para manejar cuando el video se carga
+      console.log('Video de fondo cargado');
+    };
+
+    const backgroundVideo = backgroundVideoRef.current;
+    if (backgroundVideo) {
+      backgroundVideo.addEventListener('loadeddata', handleVideoLoad);
+      backgroundVideo.addEventListener('canplay', handleVideoLoad);
+      
+      return () => {
+        backgroundVideo.removeEventListener('loadeddata', handleVideoLoad);
+        backgroundVideo.removeEventListener('canplay', handleVideoLoad);
+      };
+    }
+  }, []);
+
   /* ------------- render -------------- */
   return (
     <div
       className="app-container"
-      style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}
+      style={{ 
+        position: 'relative', 
+        minHeight: '100vh', 
+        width: '100%',
+        overflow: 'hidden' 
+      }}
     >
-      {/* 🎥 video de fondo */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
+      {/* 🎥 Video de fondo usando iframe para YouTube Shorts */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: -2,
+          overflow: 'hidden'
+        }}
+      >
+        <iframe
+          src={getYouTubeVideoUrl('https://youtube.com/shorts/IOlIJ3FJ338')}
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            width: '100vw',
+            height: '177.78vw', // 16:9 aspect ratio
+            minWidth: '177.78vh',
+            minHeight: '100vh',
+            transform: 'translate(-50%, -50%)',
+            pointerEvents: 'none',
+            border: 'none'
+          }}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerPolicy="strict-origin-when-cross-origin"
+          title="Background Video"
+        />
+      </div>
+
+      {/* Capa oscura para mejorar legibilidad */}
+      <div
         style={{
           position: 'fixed',
           top: 0,
           left: 0,
           width: '100%',
           height: '100%',
-          objectFit: 'cover',
+          background: 'rgba(0, 0, 0, 0.6)',
           zIndex: -1,
-          pointerEvents: 'none',
-        }}
-      >
-        <source src={pepehxrfondo} type="video/mp4" />
-        Tu navegador no soporta videos HTML5.
-      </video>
-
-      {/* capa oscura */}
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,.5)',
-          zIndex: 0,
           pointerEvents: 'none',
         }}
       />
 
       {/* -------------------- contenido -------------------- */}
-      <div style={{ position: 'relative', zIndex: 1, padding: '40px 0' }}>
+      <div 
+        style={{ 
+          position: 'relative', 
+          zIndex: 1, 
+          padding: '40px 0',
+          minHeight: '100vh'
+        }}
+      >
         <div
           style={{
             margin: '0 auto',
@@ -112,7 +169,14 @@ const App: React.FC = () => {
             textAlign: 'center',
           }}
         >
-          <h1 style={{ fontSize: '2.5rem', marginBottom: '30px', color: '#fff' }}>
+          <h1 
+            style={{ 
+              fontSize: '2.5rem', 
+              marginBottom: '30px', 
+              color: '#fff',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
+            }}
+          >
             Pepe el Maestro Haxor
           </h1>
 
@@ -123,6 +187,7 @@ const App: React.FC = () => {
               flexWrap: 'wrap',
               justifyContent: 'center',
               gap: '40px',
+              marginBottom: '40px'
             }}
           >
             {courses.map((course, i) => (
@@ -141,7 +206,16 @@ const App: React.FC = () => {
           </div>
 
           {description && (
-            <p style={{ marginTop: '25px', color: '#ccc' }}>{description}</p>
+            <p 
+              style={{ 
+                marginTop: '25px', 
+                color: '#ccc',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+                fontSize: '16px'
+              }}
+            >
+              {description}
+            </p>
           )}
 
           {/* reproductor + controles */}
@@ -154,21 +228,26 @@ const App: React.FC = () => {
                   justifyContent: 'center',
                   flexWrap: 'wrap',
                   gap: '20px',
-                  margin: '20px 0',
+                  margin: '30px 0',
+                  background: 'rgba(0, 0, 0, 0.7)',
+                  padding: '20px',
+                  borderRadius: '12px',
+                  backdropFilter: 'blur(10px)'
                 }}
               >
                 {/* selector calidad */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <label style={{ color: '#fff' }}>Calidad:</label>
+                  <label style={{ color: '#fff', fontWeight: '500' }}>Calidad:</label>
                   <select
                     value={videoQuality}
                     onChange={handleQualityChange}
                     style={{
-                      padding: '6px 12px',
+                      padding: '8px 12px',
                       background: '#333',
                       color: '#fff',
                       border: '1px solid #555',
                       borderRadius: '8px',
+                      fontSize: '14px'
                     }}
                   >
                     <option value="auto">Automática</option>
@@ -185,12 +264,17 @@ const App: React.FC = () => {
                   <label
                     htmlFor="audio-upload"
                     style={{
-                      padding: '6px 12px',
+                      padding: '8px 16px',
                       background: '#444',
                       color: '#fff',
                       borderRadius: '8px',
                       cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      transition: 'background 0.3s ease'
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#555'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = '#444'}
                   >
                     Audio personalizado
                   </label>
@@ -208,13 +292,17 @@ const App: React.FC = () => {
                         setAudioUrl('');
                       }}
                       style={{
-                        padding: '6px 12px',
+                        padding: '8px 16px',
                         background: '#666',
                         color: '#fff',
                         border: 'none',
                         borderRadius: '8px',
                         cursor: 'pointer',
+                        fontSize: '14px',
+                        transition: 'background 0.3s ease'
                       }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#777'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = '#666'}
                     >
                       Quitar audio
                     </button>
@@ -227,6 +315,7 @@ const App: React.FC = () => {
                 style={{
                   display: 'flex',
                   justifyContent: 'center',
+                  marginBottom: '60px'
                 }}
               >
                 <div
@@ -237,6 +326,8 @@ const App: React.FC = () => {
                     position: 'relative',
                     borderRadius: '12px',
                     overflow: 'hidden',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.6)',
+                    background: '#000'
                   }}
                 >
                   <EnhancedPlayer
@@ -250,11 +341,11 @@ const App: React.FC = () => {
           )}
 
           {/* --------- APARTADO WRITE-UPS --------- */}
-          <WriteUpsSection />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default App;
+                  <WriteUpsSection />
+                </div>
+              </div>
+            </div>
+          );
+        };
+        
+        export default App;
