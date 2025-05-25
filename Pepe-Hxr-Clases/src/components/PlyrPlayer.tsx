@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import Plyr from 'plyr';
-import 'plyr/dist/plyr.css';
 
 interface PlyrPlayerProps {
   videoId: string;
@@ -12,44 +11,50 @@ const PlyrPlayer: React.FC<PlyrPlayerProps> = ({ videoId }) => {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Inyectamos manualmente el iframe dentro del div
-containerRef.current.innerHTML = `
-  <div class="plyr__video-embed" id="player-container">
-    <iframe
-      src="https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&iv_load_policy=3&showinfo=0&controls=1&disablekb=1"
-      allowfullscreen
-      allow="autoplay"
-    ></iframe>
-    <div class="plyr-overlay-shield" id="overlay-shield"></div>
-  </div>
-`;
+    // Inyectar el iframe manualmente
+    containerRef.current.innerHTML = `
+      <div class="plyr__video-embed" id="player-container" style="position: relative">
+        <iframe
+          src="https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&iv_load_policy=3&showinfo=0&controls=1&disablekb=1"
+          allowfullscreen
+          allow="autoplay"
+          frameborder="0"
+          style="pointer-events: none; width: 100%; height: 100%; border: 0"
+        ></iframe>
+        <div class="plyr-overlay-mask" style="
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: transparent;
+          z-index: 3;
+          pointer-events: none;
+        "></div>
+      </div>
+    `;
 
-    const player = new Plyr('#player', {
+    const player = new Plyr('#player-container', {
       controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
     });
+
+    // Mascara visual cuando el video está en pausa
     player.on('pause', () => {
-  const overlay = document.getElementById('overlay-shield');
-  if (overlay) overlay.style.display = 'block';
-});
+      const iframe = containerRef.current?.querySelector('iframe');
+      if (iframe) iframe.style.pointerEvents = 'none';
+    });
 
-player.on('play', () => {
-  const overlay = document.getElementById('overlay-shield');
-  if (overlay) overlay.style.display = 'none';
-});
-
+    player.on('play', () => {
+      const iframe = containerRef.current?.querySelector('iframe');
+      if (iframe) iframe.style.pointerEvents = 'none';
+    });
 
     return () => {
       player.destroy();
     };
   }, [videoId]);
 
-  return (
-    <div
-      ref={containerRef}
-      style={{ width: '100%', height: '100%', borderRadius: '12px', overflow: 'hidden' }}
-    />
-  );
+  return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
 };
 
 export default PlyrPlayer;
-
