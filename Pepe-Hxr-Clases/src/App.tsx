@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import CourseCard from './components/CourseCards';
 import EnhancedPlayer from './components/EnhancedPlayer';
 import WriteUpsSection from './components/WriteUpsSection';
+import ModularCourses from './components/ModularCourses';
+import { ModularCourse } from './types';
 
 import logoClase1 from './assets/logos/arquitecturadecomputadoraslogo.jpg';
 import logoClase2 from './assets/logos/Anonimato.jpg';
@@ -63,6 +65,28 @@ const App: React.FC = () => {
     },
   ];
 
+  const modularCourses: ModularCourse[] = [
+    {
+      title: 'Curso Hacking Básico',
+      image: logoClase1,
+      modules: [
+        {
+          name: 'Módulo 1',
+          classes: [
+            { title: 'Introducción', videoUrl: 'https://youtu.be/WasDk4qlD1c' },
+            { title: 'Herramientas', videoUrl: 'https://youtu.be/lLMM7CdhgEk' },
+          ],
+        },
+        {
+          name: 'Módulo 2',
+          classes: [
+            { title: 'Escaneo de puertos', videoUrl: 'https://youtu.be/pknxAdkG5C0' },
+          ],
+        },
+      ],
+    },
+  ];
+
   /* ------------- handlers ------------- */
   const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -74,6 +98,13 @@ const App: React.FC = () => {
 
   const handleQualityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setVideoQuality(e.target.value);
+  };
+
+  const handleSelectModularClass = (url: string) => {
+    setVideoUrl(url);
+    setAudioUrl('');
+    setDescription('');
+    setUseCustomAudio(false);
   };
 
   // Efecto para manejar el video de fondo
@@ -339,6 +370,8 @@ const App: React.FC = () => {
               </div>
             </>
           )}
+
+          <ModularCourses courses={modularCourses} onSelectClass={handleSelectModularClass} />
 
           {/* --------- APARTADO WRITE-UPS --------- */}
                   <WriteUpsSection />
