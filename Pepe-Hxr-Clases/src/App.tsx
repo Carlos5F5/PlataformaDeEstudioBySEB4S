@@ -109,7 +109,7 @@ const App: React.FC = () => {
       id: 8,
       title: 'Clase 05 - TALLER 2 - Cracking de contraseñas',
       image: logoClase5,
-      videoUrl: 'https://www.youtube.com/watch?v=Dv3qoKJ5XtA',
+      videoUrl: 'https://youtu.be/Z0TCi_YQ0PE',
       audioUrl: '',
       description: 'Técnicas de cracking de contraseñas y seguridad.',
       isModular: false,
