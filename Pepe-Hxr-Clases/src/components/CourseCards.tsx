@@ -1,11 +1,6 @@
+// src/components/CourseCards.tsx
 import React from 'react';
-
-interface Course {
-  title: string;
-  image: string;
-  videoUrl: string;
-  description: string;
-}
+import type { Course } from '../types'; // este ya es una unión de SimpleCourse | ModularCourse
 
 interface CourseCardProps {
   course: Course;
@@ -25,8 +20,8 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, onSelect }) => {
         cursor: 'pointer',
       }}
       onClick={onSelect}
-      onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.03)')}
-      onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+      onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.03)')}
+      onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
     >
       <img
         src={course.image}

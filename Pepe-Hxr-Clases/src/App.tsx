@@ -4,13 +4,22 @@ import CourseCard from './components/CourseCards';
 import EnhancedPlayer from './components/EnhancedPlayer';
 import WriteUpsSection from './components/WriteUpsSection';
 
+
+// Importando logos de las clases
+import logoKali from './assets/logos/intallKali_Linux_Logo.jpg';
+import logoobsidian from './assets/logos/obsidian_logo.jpg';
 import logoClase1 from './assets/logos/arquitecturadecomputadoraslogo.jpg';
 import logoClase2 from './assets/logos/Anonimato.jpg';
 import logoClase3 from './assets/logos/clasepythondesdecero.jpg';
 import logoClase4 from './assets/logos/claseredes.jpg';
-
+import logoClase5 from './assets/logos/logoCrackingcontraseñas.jpg';
+// import logoDeepWeb from './assets/logos/logoDeepWeb.jpg';
+// import logoclase6 from './assets/logos/OsintLogo.jpg'
+// Importando estilos 
 import './mobile-player.css';
+// import type { Course } from './types';
 
+// Componente principal de la aplicación
 const App: React.FC = () => {
   /* -------------------- state -------------------- */
   const [videoUrl, setVideoUrl] = useState('');
@@ -31,36 +40,89 @@ const App: React.FC = () => {
     return url;
   };
 
-  /* -------------------- data --------------------- */
+  /* -------------------- data (TARJETAS DE LOS MÓDULOS) --------------------- */
   const courses = [
+        {
+      id: 1,
+      title: 'Instalación de nuestro Kali Linux ',
+      image: logoKali,
+      videoUrl: 'https://youtu.be/Dv3qoKJ5XtA',
+      audioUrl: '',
+      description: 'Proceso de instalación de Kali Linux y su arquitectura.',
+      isModular: false,
+    },
     {
+      id: 2,
+      title: 'Toma de apuntes con Obsidian',
+      image: logoobsidian,
+      videoUrl: 'https://youtu.be/JikJ_-zCkLE',
+      audioUrl: '',
+      description: 'Aprende a usar Obsidian, te ayudará en las próximas clases.',
+      isModular: false,
+    },
+    {
+      id: 3,
       title: 'Clase 01 - Arquitectura de Computadoras',
       image: logoClase1,
       videoUrl: 'https://youtu.be/WasDk4qlD1c',
       audioUrl: '',
       description: 'Introducción básica sobre hardware y componentes.',
+      isModular: false,
     },
     {
+      id: 4,
       title: 'Clase 02 - Anonimato en la red',
       image: logoClase2,
       videoUrl: 'https://youtu.be/lLMM7CdhgEk',
       audioUrl: '',
       description: 'Uso de herramientas para navegar de forma anónima.',
+      isModular: false,
     },
     {
+      id: 5,
       title: 'Clase 03 - Python desde cero',
       image: logoClase3,
       videoUrl: 'https://youtu.be/pknxAdkG5C0',
       audioUrl: '',
       description: 'Aprende a programar desde cero usando Python.',
+      isModular: false,
     },
     {
+      id: 6,
       title: 'Clase 04 - Redes y comunicaciones',
       image: logoClase4,
       videoUrl: 'https://youtu.be/81pVIBy66tY',
       audioUrl: '',
       description: 'Conceptos básicos de redes y protocolos.',
+      isModular: false,
     },
+/*     {
+      id: 7,
+      title: 'Clase 05 - TALLER 1 - DeepWeb',
+      image: logoDeepWeb,
+      videoUrl: 'https://www.youtube.com/watch?v=Dv3qoKJ5XtA',
+      audioUrl: '',
+      description: 'Aprende como funciona la DeepWeb y como formar parte de ella.',
+      isModular: false,
+    }, */
+    {
+      id: 8,
+      title: 'Clase 05 - TALLER 2 - Cracking de contraseñas',
+      image: logoClase5,
+      videoUrl: 'https://www.youtube.com/watch?v=Dv3qoKJ5XtA',
+      audioUrl: '',
+      description: 'Técnicas de cracking de contraseñas y seguridad.',
+      isModular: false,
+    },
+/*         {
+      id: 9,
+      title: 'Clase 06 - OSINT ',
+      image: logoclase6,
+      videoUrl: 'https://www.youtube.com/watch?v=Dv3qoKJ5XtA',
+      audioUrl: '',
+      description: 'Mira lo que otros no pueden, mira lo oculto.',
+      isModular: false,
+    }, */
   ];
 
   /* ------------- handlers ------------- */

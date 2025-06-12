@@ -17,6 +17,7 @@ const PlyrPlayer: React.FC<PlyrPlayerProps> = ({ videoId }) => {
         <iframe
           src="https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&iv_load_policy=3&showinfo=0&controls=1&disablekb=1"
           allowfullscreen
+          allowtransparency="true"
           allow="autoplay"
           frameborder="0"
           style="pointer-events: none; width: 100%; height: 100%; border: 0"
@@ -54,7 +55,20 @@ const PlyrPlayer: React.FC<PlyrPlayerProps> = ({ videoId }) => {
     };
   }, [videoId]);
 
-  return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
+  return (
+  <div 
+    ref={containerRef} 
+    style={{ 
+      width: '100%', 
+      aspectRatio: '16 / 9',
+      borderRadius: '12px', 
+      overflow: 'absolute',
+      position: 'relative',
+      backgroundColor: 'black'
+    }} 
+  />
+);
 };
 
 export default PlyrPlayer;
+

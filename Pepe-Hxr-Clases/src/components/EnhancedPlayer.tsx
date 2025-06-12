@@ -9,8 +9,8 @@ interface EnhancedPlayerProps {
 
 const EnhancedPlayer: React.FC<EnhancedPlayerProps> = ({ videoUrl }) => {
   const isYouTube = (url: string) => url.includes('youtube.com') || url.includes('youtu.be');
-  const isVimeo = (url: string) => url.includes('vimeo.com');
-  const isStreamtape = (url: string) => url.includes('streamtape.com');
+  // const isVimeo = (url: string) => url.includes('vimeo.com');
+  const isStreamable = (url: string) => url.includes('streamable.com/');
   const isMp4OrHls = (url: string) =>
     url.endsWith('.mp4') || url.endsWith('.m3u8') || url.includes('googlevideo.com');
 
@@ -20,7 +20,32 @@ const EnhancedPlayer: React.FC<EnhancedPlayerProps> = ({ videoUrl }) => {
     return <PlyrPlayer videoId={videoId} />;
   }
 
-  // Fallback: Usa tu reproductor nativo si no es YouTube
+  if (isStreamable(videoUrl)) {
+    const match = videoUrl.match(/streamable\.com\/([\w]+)/);
+    const videoId = match ? match[1] : '';
+
+    return (
+      <div style={{
+        width: '100%',
+        aspectRatio: '16/9',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        backgroundColor: '#000',
+      }}>
+        <iframe
+          src={`https://streamable.com/e/${videoId}`}
+          frameBorder="0"
+          allow="autoplay; encrypted-media"
+          allowFullScreen
+          style={{
+            width: '100%',
+            height: '100%',
+          }}
+        />
+      </div>
+    );
+  }
+
   if (isMp4OrHls(videoUrl)) {
     return (
       <video
@@ -39,7 +64,6 @@ const EnhancedPlayer: React.FC<EnhancedPlayerProps> = ({ videoUrl }) => {
     );
   }
 
-  // Si no es compatible
   return (
     <div style={{ color: '#fff', padding: '20px', textAlign: 'center' }}>
       No se puede reproducir este tipo de video.
