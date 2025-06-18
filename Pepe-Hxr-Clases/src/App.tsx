@@ -15,8 +15,27 @@ import logoClase4 from './assets/logos/claseredes.jpg';
 import logoClase5 from './assets/logos/logoCrackingcontraseñas.jpg';
 // import logoDeepWeb from './assets/logos/logoDeepWeb.jpg';
 // import logoclase6 from './assets/logos/OsintLogo.jpg'
+
+
+
+// Cursos modulares
+import ModularCourses from './components/ModularCourses';
+import type { ModularCourse } from './types';
+
+
+
+// LOGOS CURSOS MODULARES
+
+import logolinuxmodudar from './assets/logos/logoscursosmodulares/logolinuxmodular.jpg';
+import logopentestingmodular from './assets/logos/logoscursosmodulares/pentestingmodularcourse.jpg';
+import logopentestingwebmodular from './assets/logos/logoscursosmodulares/pentestingwebmodular.jpg';
+import logopentestingmobilemodular from './assets/logos/logoscursosmodulares/hackingandroidmodular.jpg';
+import logomalwaremodular from './assets/logos/logoscursosmodulares/malwaremodular.jpg'
+
 // Importando estilos 
 import './mobile-player.css';
+
+
 // import type { Course } from './types';
 
 // Componente principal de la aplicación
@@ -27,8 +46,217 @@ const App: React.FC = () => {
   const [description, setDescription] = useState('');
   const [useCustomAudio, setUseCustomAudio] = useState(false);
   const [videoQuality, setVideoQuality] = useState('auto');
-  
+  const [showPlayerModal, setShowPlayerModal] = useState(false);
+  const [selectedNormalClass, setSelectedNormalClass] = useState<any>(null); // Si tienes tipado, usa tu Course type
+
+
+// Componente tooltipStyle para mostrar información adicional al pasar el mouse
+const tooltipStyle: React.CSSProperties = {
+  position: 'absolute',
+  top: '-35px',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  background: 'rgba(0, 0, 0, 0.8)',
+  color: '#fff',
+  padding: '6px 12px',
+  borderRadius: '8px',
+  fontSize: '12px',
+  whiteSpace: 'nowrap',
+  opacity: 0,
+  transition: 'opacity 0.3s ease, transform 0.3s ease',
+  pointerEvents: 'none',
+  zIndex: 1
+};
+
+
+// Asignacion de los cursos modulares
+const [showModularCourses, setShowModularCourses] = useState(false);
+ 
   const backgroundVideoRef = useRef<HTMLVideoElement>(null);
+
+
+  const modularCourses: ModularCourse[] = [
+  {
+    title: 'Curso de Linux Profesional',
+    image: logolinuxmodudar, // LOGOS CURSOS MODULOS PARA MANTENER EL ORDEN
+    description: 'PRÓXIMAMENTE',
+    modules: [
+      {
+        name: 'PRÓXIMAMENTE',
+        classes: [
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' }
+
+        ]
+      },
+      {
+        name: 'PRÓXIMAMENTE',
+        classes: [
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          ]
+        },
+    ],
+      
+    },
+    {
+    title: 'Pentesting',
+    image: logopentestingmodular, // LOGOS CURSOS MODULOS PARA MANTENER EL ORDEN
+    description: 'ES UN MUNDO LIBRE...',
+    modules: [
+      {
+        name: 'PRÓXIMAMENTE',
+        classes: [
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' }
+
+        ]
+      },
+      {
+        name: 'PRÓXIMAMENTE',
+        classes: [
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          ]
+        },
+                {
+        name: 'PRÓXIMAMENTE',
+        classes: [
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          ]
+        },
+        {
+        name: 'PRÓXIMAMENTE',
+        classes: [
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          ]
+        }
+        ],
+      },
+      {
+    title: 'Pentesting Web (Especialización)',
+    image: logopentestingwebmodular, // LOGOS CURSOS MODULOS PARA MANTENER EL ORDEN
+    description: 'ES UN MUNDO LIBRE...',
+    modules: [
+      {
+        name: 'PRÓXIMAMENTE',
+        classes: [
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' }
+
+        ]
+      },
+      {
+        name: 'PRÓXIMAMENTE',
+        classes: [
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          ]
+        },
+                {
+        name: 'PRÓXIMAMENTE',
+        classes: [
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          ]
+        },
+        {
+        name: 'PRÓXIMAMENTE',
+        classes: [
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          ]
+        }
+        ],
+      },
+           {
+    title: 'Pentesting a Dispositivos Movivles (Especialización)',
+    image: logopentestingmobilemodular, // LOGOS CURSOS MODULOS PARA MANTENER EL ORDEN
+    description: 'ES UN MUNDO LIBRE...',
+    modules: [
+      {
+        name: 'PRÓXIMAMENTE',
+        classes: [
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' }
+
+        ]
+      },
+      {
+        name: 'PRÓXIMAMENTE',
+        classes: [
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          ]
+        },
+                {
+        name: 'PRÓXIMAMENTE',
+        classes: [
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          ]
+        },
+        {
+        name: 'PRÓXIMAMENTE',
+        classes: [
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          ]
+        }
+        ],
+      },
+           {
+    title: 'Desarrollo de MALWARE',
+    image: logomalwaremodular, // LOGOS CURSOS MODULOS PARA MANTENER EL ORDEN
+    description: 'ES UN MUNDO LIBRE...',
+    modules: [
+      {
+        name: 'PRÓXIMAMENTE',
+        classes: [
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' }
+
+        ]
+      },
+      {
+        name: 'PRÓXIMAMENTE',
+        classes: [
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          ]
+        },
+                {
+        name: 'PRÓXIMAMENTE',
+        classes: [
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          ]
+        },
+        {
+        name: 'PRÓXIMAMENTE',
+        classes: [
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
+          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          ]
+        }
+        ],
+      }
+  ];
+
+
+
 
   // Función para convertir YouTube Shorts URL a formato embebible
   const getYouTubeVideoUrl = (url: string) => {
@@ -231,41 +459,143 @@ const App: React.FC = () => {
             textAlign: 'center',
           }}
         >
-          <h1 
-            style={{ 
-              fontSize: '2.5rem', 
-              marginBottom: '30px', 
-              color: '#fff',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
-            }}
-          >
-            Pepe el Maestro Haxor
+     <h1
+  style={{
+    fontSize: '3rem',
+    fontWeight: '900',
+    textAlign: 'center',
+    color: '#fff',
+    textShadow: '2px 2px 6px rgba(0, 0, 0, 0.6)',
+    letterSpacing: '1px',
+    marginBottom: '80px'
+  }}
+>
+  Pepe el Maestro Haxor
+
+
+           {/* Boton para Cursos Modulares */}
+
+<div
+  style={{
+    position: window.innerWidth <= 768 ? 'absolute' : 'fixed',
+    top: '20px',
+    right: '20px',
+    zIndex: 1000,
+  }}
+>
+  <button
+    onClick={() => setShowModularCourses(!showModularCourses)}
+    style={{
+      padding: '10px 18px',
+      fontSize: '14px',
+      fontWeight: 600,
+      background: 'linear-gradient(90deg, #2dffcc, #34d5ff)',
+      color: '#0a0a0a',
+      border: 'none',
+      borderRadius: '10px',
+      cursor: 'pointer',
+      boxShadow: '0 0 10px rgba(0, 255, 180, 0.3)',
+      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+      backdropFilter: 'blur(4px)',
+      textShadow: '0 0 1px rgba(255, 255, 255, 0.2)'
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.transform = 'scale(1.05)';
+      e.currentTarget.style.boxShadow = '0 0 18px rgba(0, 255, 200, 0.5)';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.transform = 'scale(1)';
+      e.currentTarget.style.boxShadow = '0 0 10px rgba(0, 255, 180, 0.3)';
+    }}
+  >
+    {showModularCourses ? 'Volver a clases únicas' : 'Cursos Modulares'}
+  </button>
+</div>
+
+
           </h1>
 
-          {/* tarjetas de cursos */}
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-              gap: '40px',
-              marginBottom: '40px'
+   
+
+{/* tarjetas de cursos */}
+{showModularCourses ? (
+  <ModularCourses courses={modularCourses} />
+) : (
+  <>
+    <div
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        gap: '40px',
+        marginBottom: '40px'
+      }}
+    >
+      {courses.map((course, i) => (
+        <div key={i} style={{ width: '260px' }}>
+          <CourseCard
+            course={course}
+            onSelect={() => {
+              setVideoUrl(course.videoUrl);
+              setAudioUrl(course.audioUrl || '');
+              setDescription(course.description);
+              setUseCustomAudio(!!course.audioUrl);
+              setSelectedNormalClass(course);
+              setShowPlayerModal(true);
             }}
-          >
-            {courses.map((course, i) => (
-              <div key={i} style={{ width: '260px' }}>
-                <CourseCard
-                  course={course}
-                  onSelect={() => {
-                    setVideoUrl(course.videoUrl);
-                    setAudioUrl(course.audioUrl || '');
-                    setDescription(course.description);
-                    setUseCustomAudio(!!course.audioUrl);
-                  }}
-                />
-              </div>
-            ))}
-          </div>
+          />
+        </div>
+      ))}
+    </div>
+
+    {/* MODAL REPRODUCTOR CURSOS NORMALES */}
+    {showPlayerModal && videoUrl && selectedNormalClass && (
+      <div
+        onClick={() => {
+          setShowPlayerModal(false);
+          setVideoUrl('');
+          setAudioUrl('');
+          setDescription('');
+          setSelectedNormalClass(null);
+        }}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: 'rgba(0, 0, 0, 0.85)',
+          zIndex: 9999,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '20px'
+        }}
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            width: '100%',
+            maxWidth: '900px',
+            aspectRatio: '16/9',
+            backgroundColor: '#000',
+            borderRadius: '12px',
+            overflow: 'hidden',
+            position: 'relative',
+            boxShadow: '0 0 25px rgba(0,0,0,0.7)',
+            animation: 'fadeInScale 0.4s ease'
+          }}
+        >
+          <EnhancedPlayer
+            videoUrl={videoUrl}
+            audioUrl={useCustomAudio ? audioUrl : undefined}
+            quality={videoQuality}
+          />
+        </div>
+      </div>
+    )}
+  </>
+)}
 
           {description && (
             <p 
@@ -281,7 +611,7 @@ const App: React.FC = () => {
           )}
 
           {/* reproductor + controles */}
-          {videoUrl && (
+          {videoUrl && !showPlayerModal && (
             <>
               {/* controles */}
               <div
@@ -406,8 +736,241 @@ const App: React.FC = () => {
                   <WriteUpsSection />
                 </div>
               </div>
+            {/* Íconos de redes */}
+
+<div
+  style={{
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '45px',
+    marginTop: '40px',
+    marginBottom: '60px',
+    position: 'relative',
+    
+  }}
+>
+  {/* Ícono WhatsApp */}
+  <div style={{ position: 'relative' }}>
+    <a
+      href="https://chat.whatsapp.com/CpuJgWjjfgRLRecwDAWSsZ"
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        color: '#25D366',
+        fontSize: '48px',
+        transition: 'transform 0.2s'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'scale(1.2)';
+        const tooltip = e.currentTarget.nextSibling as HTMLElement;
+        tooltip.style.opacity = '1';
+        tooltip.style.transform = 'translateY(-10px)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'scale(1)';
+        const tooltip = e.currentTarget.nextSibling as HTMLElement;
+        tooltip.style.opacity = '0';
+        tooltip.style.transform = 'translateY(0)';
+      }}
+    >
+      <i className="fab fa-whatsapp"></i>
+    </a>
+    <div style={tooltipStyle}>Canal WhatsApp NO RULES X:</div>
+  </div>
+
+  {/* Ícono WhatsApp GRUPO CLASES */}
+  <div style={{ position: 'relative' }}>
+    <a
+      href="https://chat.whatsapp.com/HbehXgRIOiL5QlYK3uJuS3"
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        color: '#25D366',
+        fontSize: '48px',
+        transition: 'transform 0.2s'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'scale(1.2)';
+        const tooltip = e.currentTarget.nextSibling as HTMLElement;
+        tooltip.style.opacity = '1';
+        tooltip.style.transform = 'translateY(-10px)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'scale(1)';
+        const tooltip = e.currentTarget.nextSibling as HTMLElement;
+        tooltip.style.opacity = '0';
+        tooltip.style.transform = 'translateY(0)';
+      }}
+    >
+      <i className="fab fa-whatsapp"></i>
+    </a>
+    <div style={tooltipStyle}>Grupo de Clases, habemos gente de todo tipo, no te pierdas de ninguna clases !</div>
+  </div>
+
+  {/* Ícono Telegram */}
+  <div style={{ position: 'relative' }}>
+    <a
+      href="https://t.me/+xv1FGWMZYTE2NTQ5"
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        color: '#0088cc',
+        fontSize: '48px',
+        transition: 'transform 0.2s'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'scale(1.2)';
+        const tooltip = e.currentTarget.nextSibling as HTMLElement;
+        tooltip.style.opacity = '1';
+        tooltip.style.transform = 'translateY(-10px)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'scale(1)';
+        const tooltip = e.currentTarget.nextSibling as HTMLElement;
+        tooltip.style.opacity = '0';
+        tooltip.style.transform = 'translateY(0)';
+      }}
+    >
+      <i className="fab fa-telegram-plane"></i>
+    </a>
+    <div style={tooltipStyle}>Telegram: Recursos, labs, cursos y más, encontrarás mucho aquí, pero está en ti aprobecharlo y también puedes compartir recursos</div>
+  </div>
+
+  {/* Ícono Discord */}
+  <div style={{ position: 'relative' }}>
+    <a
+      href="https://discord.gg/fBPWcQpYtq
+"
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        color: '#7289da',
+        fontSize: '48px',
+        transition: 'transform 0.2s'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'scale(1.2)';
+        const tooltip = e.currentTarget.nextSibling as HTMLElement;
+        tooltip.style.opacity = '1';
+        tooltip.style.transform = 'translateY(-10px)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'scale(1)';
+        const tooltip = e.currentTarget.nextSibling as HTMLElement;
+        tooltip.style.opacity = '0';
+        tooltip.style.transform = 'translateY(0)';
+      }}
+    >
+      <i className="fab fa-discord"></i>
+    </a>
+    <div style={tooltipStyle}>Servidor Discord</div>
+  </div>
+
+  {/* Ícono Hack The Box */}
+  <div style={{ position: 'relative' }}>
+    <a
+      href="https://app.hackthebox.com/teams/overview/7060"
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        color: '#9FEF00',
+        fontSize: '48px',
+        transition: 'transform 0.2s'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'scale(1.2)';
+        const tooltip = e.currentTarget.nextSibling as HTMLElement;
+        tooltip.style.opacity = '1';
+        tooltip.style.transform = 'translateY(-10px)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'scale(1)';
+        const tooltip = e.currentTarget.nextSibling as HTMLElement;
+        tooltip.style.opacity = '0';
+        tooltip.style.transform = 'translateY(0)';
+      }}
+    >
+      <i className="fas fa-terminal"></i>
+    </a>
+    <div style={tooltipStyle}>Team de Hack The Box</div>
+  </div>
+</div>
+
+<footer
+  style={{
+    background: 'rgba(0, 0, 0, 0.75)',
+    padding: 'clamp(20px, 5vw, 40px)',
+    textAlign: 'center',
+    color: '#ccc',
+    borderTop: '1px solid rgba(0,255,0,0.05)',
+    backdropFilter: 'blur(6px)',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 'clamp(10px, 2vw, 20px)',
+    marginTop: '80px'
+  }}
+>
+  <h3
+    style={{
+      margin: 0,
+      fontSize: 'clamp(1rem, 2vw, 1.3rem)',
+      fontWeight: '600',
+      color: '#fff',
+      textShadow: '0 1px 3px #00ff9f'
+    }}
+  >
+    Hecho con por <span style={{ color: '#00ff9f', fontWeight: '700' }}>SEB4S</span>
+  </h3>
+
+  <p
+    style={{
+      margin: 0,
+      fontSize: 'clamp(0.85rem, 2vw, 1rem)',
+      color: '#a7ffdf',
+      textShadow: '0 0 2px #00ffaa',
+      maxWidth: '90%',
+      lineHeight: '1.5'
+    }}
+  >
+    ¿Te gustó la plataforma? ¡Invítame un café!
+  </p>
+
+  <a
+    href="https://coff.ee/seb4s"
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{
+      background: 'linear-gradient(90deg, #00ffcc 0%, #00ff80 100%)',
+      color: '#0a0a0a',
+      padding: '10px 24px',
+      borderRadius: '10px',
+      fontWeight: 700,
+      fontSize: 'clamp(0.9rem, 2vw, 1rem)',
+      textDecoration: 'none',
+      boxShadow: '0 0 14px #00ffcc',
+      transition: 'all 0.25s ease-in-out',
+      textTransform: 'uppercase',
+      letterSpacing: '1px'
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.boxShadow = '0 0 24px #00ffaa';
+      e.currentTarget.style.transform = 'scale(1.04)';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.boxShadow = '0 0 14px #00ffcc';
+      e.currentTarget.style.transform = 'scale(1)';
+    }}
+  >
+    Donar
+  </a>
+</footer>
+
+
+
             </div>
           );
         };
+        
         
         export default App;
