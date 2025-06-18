@@ -874,7 +874,7 @@ const [showModularCourses, setShowModularCourses] = useState(false);
       rel="noopener noreferrer"
       style={{
         color: '#9FEF00',
-        fontSize: '48px',
+        fontSize: '28px',
         transition: 'transform 0.2s'
       }}
       onMouseEnter={(e) => {
