@@ -480,7 +480,7 @@ const WriteUpsSection: React.FC = () => {
                 ? ' Subiendo archivos...'
                 : dragOver
                 ? ` Suelta los archivos para ${selectedOS}`
-                : ` Arrastra archivos aquí (.pdf o .md, máx ${MAX_SIZE_MB} MB)\n${selectedOS} seleccionado`}
+                : ` Arrastra archivos aquí (.pdf o .md, máx ${MAX_SIZE_MB} MB)\n${selectedOS} seleccionado, POR FAVOR NO MEZCLES SOs`}
             </div>
 
             {/* Grid de archivos con separación por OS */}

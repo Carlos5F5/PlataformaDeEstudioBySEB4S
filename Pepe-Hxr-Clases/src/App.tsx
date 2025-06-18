@@ -757,7 +757,7 @@ const [showModularCourses, setShowModularCourses] = useState(false);
       rel="noopener noreferrer"
       style={{
         color: '#25D366',
-        fontSize: '48px',
+        fontSize: '28px',
         transition: 'transform 0.2s'
       }}
       onMouseEnter={(e) => {
@@ -786,7 +786,7 @@ const [showModularCourses, setShowModularCourses] = useState(false);
       rel="noopener noreferrer"
       style={{
         color: '#25D366',
-        fontSize: '48px',
+        fontSize: '28px',
         transition: 'transform 0.2s'
       }}
       onMouseEnter={(e) => {
@@ -815,7 +815,7 @@ const [showModularCourses, setShowModularCourses] = useState(false);
       rel="noopener noreferrer"
       style={{
         color: '#0088cc',
-        fontSize: '48px',
+        fontSize: '28px',
         transition: 'transform 0.2s'
       }}
       onMouseEnter={(e) => {
@@ -845,7 +845,7 @@ const [showModularCourses, setShowModularCourses] = useState(false);
       rel="noopener noreferrer"
       style={{
         color: '#7289da',
-        fontSize: '48px',
+        fontSize: '28px',
         transition: 'transform 0.2s'
       }}
       onMouseEnter={(e) => {
