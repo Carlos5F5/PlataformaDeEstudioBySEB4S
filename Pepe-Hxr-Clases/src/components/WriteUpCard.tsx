@@ -1,7 +1,9 @@
 import React from 'react';
 
 interface WriteUpCardProps {
-  file: File;
+  file: File | null;
+  fileName: string;
+  fileSize: number;
   os: 'Linux' | 'Windows';
   onRemove?: () => void;
   cloudinaryUrl?: string;
@@ -9,9 +11,11 @@ interface WriteUpCardProps {
 }
 
 const WriteUpCard: React.FC<WriteUpCardProps> = ({ 
-  file, 
+  file,
+  fileName,
+  fileSize,
   os, 
-  //onRemove, 
+  onRemove, 
   cloudinaryUrl, 
   uploadedAt 
 }) => {
@@ -37,7 +41,7 @@ const WriteUpCard: React.FC<WriteUpCardProps> = ({
 
   const getFileIcon = (fileName: string): string => {
     const ext = fileName.toLowerCase().split('.').pop();
-    return ext === 'pdf' ? '📄' : '📝';
+    return ext === 'pdf' ? '' : '';
   };
 
   const getFileTypeDisplay = (fileName: string): string => {
@@ -50,13 +54,13 @@ const WriteUpCard: React.FC<WriteUpCardProps> = ({
     if (cloudinaryUrl) {
       try {
         // Para PDFs, abrimos en nueva pestaña para visualización
-        if (file.name.toLowerCase().endsWith('.pdf')) {
+        if (fileName.toLowerCase().endsWith('.pdf')) {
           window.open(cloudinaryUrl, '_blank', 'noopener,noreferrer');
         } else {
           // Para archivos Markdown, forzamos descarga
           const link = document.createElement('a');
           link.href = cloudinaryUrl;
-          link.download = file.name;
+          link.download = fileName;
           link.target = '_blank';
           link.rel = 'noopener noreferrer';
           
@@ -138,7 +142,7 @@ const WriteUpCard: React.FC<WriteUpCardProps> = ({
         Object.assign(e.currentTarget.style, cardStyle);
       }}
     >
-      {/* Botón de eliminar 
+      {/* Botón de eliminar
       {onRemove && (
         <button
           onClick={onRemove}
@@ -173,8 +177,7 @@ const WriteUpCard: React.FC<WriteUpCardProps> = ({
           ×
         </button>
       )}
-      */}
-
+ */}
       {/* Indicador de SO mejorado */}
       <div style={{
         position: 'absolute',
@@ -192,7 +195,7 @@ const WriteUpCard: React.FC<WriteUpCardProps> = ({
         alignItems: 'center',
         gap: '4px',
       }}>
-        {os === 'Linux' ? '' : ''} {os}
+        {os === 'Linux' ? '' : '⊞'} {os}
       </div>
 
       {/* Contenido principal */}
@@ -202,7 +205,7 @@ const WriteUpCard: React.FC<WriteUpCardProps> = ({
           marginBottom: '12px',
           filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
         }}>
-          {getFileIcon(file.name)}
+          {getFileIcon(fileName)}
         </div>
         
         <h4 style={{
@@ -219,7 +222,7 @@ const WriteUpCard: React.FC<WriteUpCardProps> = ({
           WebkitLineClamp: 2,
           WebkitBoxOrient: 'vertical',
         }}>
-          {file.name}
+          {fileName}
         </h4>
 
         <div style={{
@@ -232,7 +235,7 @@ const WriteUpCard: React.FC<WriteUpCardProps> = ({
           alignItems: 'center'
         }}>
           <span>
-            {getFileTypeDisplay(file.name)} • {formatFileSize(file.size)}
+            {getFileTypeDisplay(fileName)} • {formatFileSize(fileSize)}
           </span>
           {uploadedAt && (
             <span style={{ fontSize: '10px', opacity: 0.8 }}>
@@ -252,7 +255,7 @@ const WriteUpCard: React.FC<WriteUpCardProps> = ({
           onClick={handleDownload}
           style={{
             ...buttonStyle,
-            background: file.name.toLowerCase().endsWith('.pdf') 
+            background: fileName.toLowerCase().endsWith('.pdf') 
               ? 'linear-gradient(135deg, #e74c3c, #c0392b)'
               : 'linear-gradient(135deg, #3498db, #2980b9)',
           }}
@@ -265,9 +268,9 @@ const WriteUpCard: React.FC<WriteUpCardProps> = ({
             e.currentTarget.style.opacity = '1';
           }}
           disabled={!cloudinaryUrl}
-          title={file.name.toLowerCase().endsWith('.pdf') ? 'Ver PDF' : 'Descargar archivo'}
+          title={fileName.toLowerCase().endsWith('.pdf') ? 'Ver PDF' : 'Descargar archivo'}
         >
-          {file.name.toLowerCase().endsWith('.pdf') ? 'Ver' : 'VER'}
+          {fileName.toLowerCase().endsWith('.pdf') ? 'Ver' : 'Descargar'}
         </button>
 
         <button
@@ -287,7 +290,7 @@ const WriteUpCard: React.FC<WriteUpCardProps> = ({
           disabled={!cloudinaryUrl}
           title="Copiar URL del archivo"
         >
-          URL
+          Copiar URL
         </button>
       </div>
 
@@ -305,7 +308,7 @@ const WriteUpCard: React.FC<WriteUpCardProps> = ({
           fontSize: '9px',
           fontWeight: 'bold',
         }}>
-          ⏳ Procesando...
+          Procesando...
         </div>
       )}
     </div>

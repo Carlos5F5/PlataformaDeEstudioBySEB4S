@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import WriteUpCard from './WriteUpCard';
 
+// Conexión a SUPABASE
+import { supabase } from '../types/supabaseClient';
+
 type OS = 'Linux' | 'Windows';
 
 interface StoredWU {
   id: string;
-  file: File;
+  file: File | null; // Permitir null para archivos cargados desde DB
   os: OS;
   cloudinaryUrl: string;
   uploadedAt: string;
@@ -34,64 +37,79 @@ const WriteUpsSection: React.FC = () => {
   const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
   const [selectedOS, setSelectedOS] = useState<OS>('Linux');
 
+  // Cargar write-ups desde Supabase al iniciar
   useEffect(() => {
-    const savedWriteUps = localStorage.getItem('cloudinary-writeups');
-    if (savedWriteUps) {
+    const fetchWriteUps = async () => {
+      console.log('Cargando write-ups desde Supabase...');
+      
       try {
-        const parsed: StoredWU[] = JSON.parse(savedWriteUps);
-        const restored = parsed.map(wu => ({
-          ...wu,
-          file: new File([], wu.name, { type: getFileType(wu.name) })
-        }));
+        const { data, error } = await supabase
+          .from('writeups')
+          .select('*')
+          .order('uploadedAt', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching writeups:', error);
+          return;
+        }
+
+        console.log('Datos recibidos de Supabase:', data);
+
+        if (!data || data.length === 0) {
+          console.log('No hay write-ups en la base de datos');
+          setStore([]);
+          return;
+        }
+
+        const restored: StoredWU[] = [];
+
+        // Procesar cada write-up
+        for (const wu of data) {
+          try {
+            // Verificar que la URL de Cloudinary esté disponible
+            const res = await fetch(wu.cloudinaryUrl, { method: 'HEAD' });
+
+            if (res.ok) {
+              // Crear el objeto StoredWU sin File real, solo con los metadatos
+              const restoredWU: StoredWU = {
+                id: wu.id,
+                file: null, // No necesitamos el File object para mostrar
+                os: wu.os,
+                cloudinaryUrl: wu.cloudinaryUrl,
+                uploadedAt: wu.uploadedAt,
+                size: wu.size,
+                name: wu.name
+              };
+              
+              restored.push(restoredWU);
+              console.log(`Write-up restaurado: ${wu.name}`);
+            } else {
+              // Si el archivo no existe en Cloudinary, eliminarlo de Supabase
+              console.warn(`Archivo ${wu.name} no encontrado en Cloudinary, eliminando de DB`);
+              await supabase
+                .from('writeups')
+                .delete()
+                .eq('id', wu.id);
+            }
+          } catch (err) {
+            console.error(`Error al verificar URL de ${wu.name}:`, err);
+          }
+        }
+
+        console.log(`Se restauraron ${restored.length} write-ups`);
         setStore(restored);
       } catch (error) {
-        console.error('Error al cargar write-ups guardados:', error);
+        console.error('Error general al cargar write-ups:', error);
       }
-    }
-  }, []);
+    };
 
-  useEffect(() => {
-    if (store.length > 0) {
-      const toSave = store.map(wu => ({
-        id: wu.id,
-        os: wu.os,
-        cloudinaryUrl: wu.cloudinaryUrl,
-        uploadedAt: wu.uploadedAt,
-        size: wu.size,
-        name: wu.name
-      }));
-      localStorage.setItem('cloudinary-writeups', JSON.stringify(toSave));
-    } else {
-      localStorage.removeItem('cloudinary-writeups');
-    }
-  }, [store]);
+    fetchWriteUps();
+  }, []);
 
   const getFileType = (filename: string): string => {
     const ext = filename.toLowerCase().split('.').pop();
     return ext === 'pdf' ? 'application/pdf' : 'text/markdown';
   };
-
-
-  // RECARGA DE CLOUDINARY ARCHIVOS
-  useEffect(() => {
-  store.forEach(item => {
-    if (item.cloudinaryUrl) {
-      fetch(item.cloudinaryUrl, { method: 'HEAD' })
-        .then(response => {
-          if (!response.ok) {
-            // Si fue eliminado en Cloudinary, quitamos el item
-            setStore(prev => prev.filter(w => w.cloudinaryUrl !== item.cloudinaryUrl));
-          }
-        })
-        .catch(() => {
-          // Si hay error de red, también quitar
-          setStore(prev => prev.filter(w => w.cloudinaryUrl !== item.cloudinaryUrl));
-        });
-    }
-  });
-}, [store]);
-
-
 
   const allowed = (f: File): boolean => {
     const ext = f.name.toLowerCase().trim().split('.').pop();
@@ -102,131 +120,143 @@ const WriteUpsSection: React.FC = () => {
     return sizeOk && validExtension;
   };
 
-  const uploadToCloudinary = async (file: File): Promise<CloudinaryResponse> => {
-    return new Promise((resolve, reject) => {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-      formData.append('resource_type', 'auto'); // Cambio importante: 'raw' en lugar de 'auto'
-      formData.append('context', `alt=${file.name}`); // <-- para que Cloudinary lo sirva como PDF
-      const xhr = new XMLHttpRequest();
-      
-      xhr.upload.addEventListener('progress', (event) => {
-        if (event.lengthComputable) {
-          const percentComplete = (event.loaded / event.total) * 100;
-          setUploadProgress(prev => ({ 
-            ...prev, 
-            [`${Date.now()}-${file.name}`]: Math.round(percentComplete) 
-          }));
-        }
-      });
-
-      xhr.addEventListener('load', () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const data: CloudinaryResponse = JSON.parse(xhr.responseText);
-            if (!data.secure_url) {
-              reject(new Error('Respuesta inválida de Cloudinary'));
-            } else {
-              resolve(data);
-            }
-          } catch (error) {
-            reject(new Error('Error al parsear respuesta de Cloudinary'));
-          }
-        } else {
-          reject(new Error(`Error HTTP ${xhr.status}: ${xhr.responseText}`));
-        }
-      });
-
-      xhr.addEventListener('error', () => {
-        reject(new Error('Error de red al subir archivo'));
-      });
-
-      xhr.addEventListener('timeout', () => {
-        reject(new Error('Timeout al subir archivo'));
-      });
-
-      xhr.timeout = 60000;
-      xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`);
-      xhr.send(formData);
-    });
-  };
-
+  // Función para agregar archivos de cloudinary y supabase
   const addFiles = async (files: FileList, os: OS) => {
-    const uploaded: StoredWU[] = [];
-    const rejected: Array<{name: string, reason: string}> = [];
+    const validFiles = Array.from(files).filter(allowed);
+    
+    if (validFiles.length === 0) {
+      alert('No hay archivos válidos para subir. Solo se permiten archivos .pdf y .md de máximo 10MB');
+      return;
+    }
 
+    console.log(`Iniciando subida de ${validFiles.length} archivos para ${os}`);
     setUploading(true);
-    setUploadProgress({});
+    const uploaded: StoredWU[] = [];
 
-    for (const file of Array.from(files)) {
-      const fileId = `${Date.now()}-${file.name}`;
+    // Procesar archivos uno por uno
+    for (const file of validFiles) {
+      const fileKey = `${Date.now()}-${file.name}`;
+      console.log(`Procesando archivo: ${file.name}`);
       
-      if (!allowed(file)) {
-        const sizeInMB = file.size / 1024 / 1024;
-        const ext = file.name.toLowerCase().split('.').pop();
-        let reason = '';
-        
-        if (sizeInMB > MAX_SIZE_MB) {
-          reason = `Tamaño excesivo (${sizeInMB.toFixed(2)} MB)`;
-        } else if (ext !== 'pdf' && ext !== 'md') {
-          reason = `Extensión no válida (.${ext})`;
-        }
-        
-        rejected.push({ name: file.name, reason });
-        continue;
-      }
-
       try {
-        setUploadProgress(prev => ({ ...prev, [fileId]: 0 }));
-        
-        console.log(`Subiendo a Cloudinary: ${file.name}`);
-        const cloudinaryData = await uploadToCloudinary(file);
-        
-        setUploadProgress(prev => ({ ...prev, [fileId]: 100 }));
+        // Crear FormData para Cloudinary
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        formData.append('resource_type', 'raw');
 
-        const newWriteUp: StoredWU = {
-          id: fileId,
-          file: new File([file], file.name, { type: file.type }),
-          os,
-          cloudinaryUrl: cloudinaryData.secure_url,
-          uploadedAt: new Date().toISOString(),
-          size: cloudinaryData.bytes,
-          name: cloudinaryData.original_filename || file.name
-        };
+        // Simular progreso inicial
+        setUploadProgress(prev => ({ ...prev, [fileKey]: 0 }));
 
-        uploaded.push(newWriteUp);
-        console.log(`Subido exitosamente: ${file.name}`);
+        // Subir a Cloudinary con seguimiento de progreso
+        const xhr = new XMLHttpRequest();
         
-      } catch (error) {
-        console.error(`Error al subir ${file.name}:`, error);
-        rejected.push({ 
-          name: file.name, 
-          reason: error instanceof Error ? error.message : 'Error desconocido'
+        const cloudinaryPromise = new Promise<CloudinaryResponse>((resolve, reject) => {
+          xhr.upload.addEventListener('progress', (event) => {
+            if (event.lengthComputable) {
+              const percentComplete = Math.round((event.loaded / event.total) * 80); // 80% para subida
+              setUploadProgress(prev => ({ ...prev, [fileKey]: percentComplete }));
+            }
+          });
+
+          xhr.addEventListener('load', () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              try {
+                const data: CloudinaryResponse = JSON.parse(xhr.responseText);
+                resolve(data);
+              } catch (error) {
+                reject(new Error('Error al parsear respuesta de Cloudinary'));
+              }
+            } else {
+              reject(new Error(`Error HTTP ${xhr.status}: ${xhr.responseText}`));
+            }
+          });
+
+          xhr.addEventListener('error', () => {
+            reject(new Error('Error de red al subir archivo'));
+          });
+
+          xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload`);
+          xhr.send(formData);
         });
+
+        const cloudinaryData = await cloudinaryPromise;
+        console.log(`Archivo subido a Cloudinary: ${file.name}`, cloudinaryData);
+        
+        // Actualizar progreso a 90%
+        setUploadProgress(prev => ({ ...prev, [fileKey]: 90 }));
+
+        if (cloudinaryData.secure_url) {
+          // Preparar datos para Supabase
+          const supabaseData = {
+            name: file.name,
+            os: os,
+            cloudinaryUrl: cloudinaryData.secure_url,
+            uploadedAt: new Date().toISOString(),
+            size: file.size
+          };
+
+          console.log('Insertando en Supabase:', supabaseData);
+
+          // Insertar en Supabase
+          const { data: inserted, error } = await supabase
+            .from('writeups')
+            .insert([supabaseData])
+            .select()
+            .single();
+
+          if (error) {
+            console.error('Error insertando en Supabase:', error);
+            throw new Error(`Error en Supabase: ${error.message}`);
+          }
+
+          console.log('Inserción exitosa en Supabase:', inserted);
+
+          // Crear objeto para el store local
+          const newWriteUp: StoredWU = {
+            id: inserted.id,
+            file: file, // Mantener el archivo original para archivos recién subidos
+            os: inserted.os,
+            cloudinaryUrl: inserted.cloudinaryUrl,
+            uploadedAt: inserted.uploadedAt,
+            size: inserted.size,
+            name: inserted.name
+          };
+
+          uploaded.push(newWriteUp);
+          
+          // Actualizar progreso a 100%
+          setUploadProgress(prev => ({ ...prev, [fileKey]: 100 }));
+          
+          console.log('Write-up agregado correctamente:', newWriteUp);
+        }
+      } catch (err) {
+        console.error(`Error subiendo archivo: ${file.name}`, err);
+        alert(`Error subiendo ${file.name}: ${err instanceof Error ? err.message : 'Error desconocido'}`);
         setUploadProgress(prev => {
           const newProgress = { ...prev };
-          delete newProgress[fileId];
+          delete newProgress[fileKey];
           return newProgress;
         });
       }
     }
 
-    setUploading(false);
-    setUploadProgress({});
-
-    if (rejected.length > 0) {
-      const rejectedDetails = rejected.map(r => `• ${r.name}: ${r.reason}`).join('\n');
-      alert(
-        `Archivos rechazados:\n\n${rejectedDetails}\n\n` +
-        `Acepto solo archivos .pdf o .md de hasta ${MAX_SIZE_MB} MB`
-      );
-    }
-
+    // Actualizar store con todos los archivos subidos
     if (uploaded.length > 0) {
-      setStore(prev => [...prev, ...uploaded]);
-      console.log(`${uploaded.length} archivo(s) subido(s) exitosamente`);
+      setStore(prev => {
+        const newStore = [...uploaded, ...prev];
+        console.log('Store actualizado con:', newStore.length, 'archivos');
+        return newStore;
+      });
+      
+      console.log(`✅ Subida completada: ${uploaded.length} archivos procesados exitosamente`);
     }
+
+    // Limpiar progreso después de un breve delay
+    setTimeout(() => {
+      setUploadProgress({});
+      setUploading(false);
+    }, 1000);
   };
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -244,8 +274,29 @@ const WriteUpsSection: React.FC = () => {
     addFiles(e.dataTransfer.files, selectedOS);
   };
 
-  const removeWriteUp = (id: string) => {
-    setStore(prev => prev.filter(wu => wu.id !== id));
+  const removeWriteUp = async (id: string) => {
+    try {
+      console.log(`Eliminando write-up con ID: ${id}`);
+      
+      // Eliminar de Supabase
+      const { error } = await supabase
+        .from('writeups')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error eliminando de Supabase:', error);
+        alert('Error al eliminar el archivo de la base de datos');
+        return;
+      }
+
+      // Eliminar del store local
+      setStore(prev => prev.filter(wu => wu.id !== id));
+      console.log('Write-up eliminado correctamente');
+    } catch (err) {
+      console.error('Error eliminando write-up:', err);
+      alert('Error al eliminar el archivo');
+    }
   };
 
   const visible = store.filter(w => filter === 'All' || w.os === filter);
@@ -310,7 +361,7 @@ const WriteUpsSection: React.FC = () => {
       >
         Write-Ups&nbsp;
         <span style={{ fontSize: '1.3rem', color: '#4fa' }}>
-          {open ? '' : ''}
+          {open ? '⌄' : '⌄'}
         </span>
       </button>
 
@@ -355,14 +406,14 @@ const WriteUpsSection: React.FC = () => {
                     style={osButtonStyle('Linux')}
                     disabled={uploading}
                   >
-                    Linux
+                     Linux
                   </button>
                   <button
                     onClick={() => setSelectedOS('Windows')}
                     style={osButtonStyle('Windows')}
                     disabled={uploading}
                   >
-                     Windows
+                    Windows
                   </button>
                 </div>
               </div>
@@ -383,7 +434,7 @@ const WriteUpsSection: React.FC = () => {
                     display: 'inline-block',
                   }}
                 >
-                  {uploading ? 'Subiendo...' : ` Subir para ${selectedOS}`}
+                  {uploading ? 'Subiendo...' : `Subir para ${selectedOS}`}
                   <input
                     type="file"
                     accept=".pdf,.md"
@@ -401,7 +452,7 @@ const WriteUpsSection: React.FC = () => {
                 >
                   <option value="All"> Todos ({store.length})</option>
                   <option value="Linux"> Linux ({linuxCount})</option>
-                  <option value="Windows"> Windows ({windowsCount})</option>
+                  <option value="Windows">Windows ({windowsCount})</option>
                 </select>
               </div>
             </div>
@@ -422,7 +473,7 @@ const WriteUpsSection: React.FC = () => {
                 }}
               >
                 <div style={{ fontWeight: '600', marginBottom: 8 }}>
-                  ⏳ Subiendo archivos a {selectedOS}...
+                  Subiendo archivos a {selectedOS}...
                 </div>
                 {Object.entries(uploadProgress).map(([fileId, progress]) => (
                   <div key={fileId} style={{ marginTop: 8 }}>
@@ -480,7 +531,7 @@ const WriteUpsSection: React.FC = () => {
                 ? ' Subiendo archivos...'
                 : dragOver
                 ? ` Suelta los archivos para ${selectedOS}`
-                : ` Arrastra archivos aquí (.pdf o .md, máx ${MAX_SIZE_MB} MB)\n${selectedOS} seleccionado, POR FAVOR NO MEZCLES SOs`}
+                : `Arrastra archivos aquí (.pdf o .md, máx ${MAX_SIZE_MB} MB)\n${selectedOS} seleccionado, POR FAVOR NO MEZCLES SOs`}
             </div>
 
             {/* Grid de archivos con separación por OS */}
@@ -509,7 +560,9 @@ const WriteUpsSection: React.FC = () => {
                       {store.filter(w => w.os === 'Linux').map((w) => (
                         <WriteUpCard 
                           key={w.id} 
-                          file={w.file} 
+                          file={w.file}
+                          fileName={w.name}
+                          fileSize={w.size}
                           os={w.os}
                           onRemove={() => removeWriteUp(w.id)}
                           cloudinaryUrl={w.cloudinaryUrl}
@@ -543,7 +596,9 @@ const WriteUpsSection: React.FC = () => {
                       {store.filter(w => w.os === 'Windows').map((w) => (
                         <WriteUpCard 
                           key={w.id} 
-                          file={w.file} 
+                          file={w.file}
+                          fileName={w.name}
+                          fileSize={w.size}
                           os={w.os}
                           onRemove={() => removeWriteUp(w.id)}
                           cloudinaryUrl={w.cloudinaryUrl}
@@ -567,7 +622,9 @@ const WriteUpsSection: React.FC = () => {
                   visible.map((w) => (
                     <WriteUpCard 
                       key={w.id} 
-                      file={w.file} 
+                      file={w.file}
+                      fileName={w.name}
+                      fileSize={w.size}
                       os={w.os}
                       onRemove={() => removeWriteUp(w.id)}
                       cloudinaryUrl={w.cloudinaryUrl}
@@ -577,8 +634,8 @@ const WriteUpsSection: React.FC = () => {
                 ) : (
                   <p style={{ color: '#aaa', gridColumn: '1/-1', textAlign: 'center' }}>
                     {filter === 'All' 
-                      ? ' No hay write-ups para mostrar'
-                      : ` No hay write-ups de ${filter} para mostrar`
+                      ? 'No hay write-ups para mostrar'
+                      : `No hay write-ups de ${filter} para mostrar`
                     }
                   </p>
                 )}
@@ -608,9 +665,6 @@ const WriteUpsSection: React.FC = () => {
                   Total: {store.length} archivo{store.length !== 1 ? 's' : ''} | 
                   Linux: {linuxCount} | 
                   Windows: {windowsCount}
-                </div>
-                <div style={{ fontSize: '0.8rem', marginTop: 4, opacity: 0.8 }}>
-                  
                 </div>
               </motion.div>
             )}

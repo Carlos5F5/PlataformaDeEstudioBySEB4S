@@ -84,7 +84,7 @@ const [showModularCourses, setShowModularCourses] = useState(false);
       {
         name: 'PRÓXIMAMENTE',
         classes: [
-          { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
+          { title: 'BASH A TOPE JUAJUAJUAS', videoUrl: 'https://youtu.be/IOlIJ3FJ338' },
           { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
           { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' },
           { title: 'PRÓXIMAMENTE', videoUrl: 'https://youtu.be/lXMskKTw3Bc' }
