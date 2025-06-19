@@ -20,23 +20,31 @@ const ModularCourses: React.FC<ModularCoursesProps> = ({ courses }) => {
     <div style={{ marginTop: '80px', padding: '0 20px', color: '#fff', textAlign: 'center' }}>
      
 <div style={{
-  marginBottom: '30px',
+  marginBottom: '70px',
   textAlign: 'center',
   position: 'relative',
 }}>
   <h2 style={{
-    fontSize: '2rem',
-    fontWeight: '700',
+    fontSize: '2.2rem',
+    fontWeight: '800',
     color: '#00ffc3',
-    textShadow: '0 0 12px rgba(0,255,200,0.3)',
+    textTransform: 'uppercase',
+    textShadow: '0 0 12px rgba(0,255,200,0.5), 0 0 24px rgba(0,255,200,0.2)',
     display: 'inline-block',
+    letterSpacing: '1.5px',
+    background: 'rgba(0, 255, 200, 0.05)',
+    backdropFilter: 'blur(8px)',
+    border: '1px solid rgba(0,255,200,0.2)',
+    borderRadius: '14px',
+    padding: '16px 36px',
     position: 'relative',
-    letterSpacing: '1px',
-    animation: 'pulseGlow 2.5s infinite ease-in-out'
+    animation: 'pulseGlow 2.5s infinite ease-in-out',
+    borderBottom: '3px solid rgba(0,255,200,0.7)',
   }}>
     Cursos Modulares
   </h2>
 </div>
+
 
 
       {!selectedCourse ? (

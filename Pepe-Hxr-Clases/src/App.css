@@ -412,3 +412,14 @@ body {
     text-shadow: 0 0 20px rgba(0,255,200,0.6), 0 0 30px rgba(0,255,200,0.3);
   }
 }
+@keyframes pulseGlow {
+  0% {
+    text-shadow: 0 0 10px rgba(0,255,200,0.5), 0 0 20px rgba(0,255,200,0.3);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(0,255,200,0.7), 0 0 40px rgba(0,255,200,0.5);
+  }
+  100% {
+    text-shadow: 0 0 10px rgba(0,255,200,0.5), 0 0 20px rgba(0,255,200,0.3);
+  }
+}
