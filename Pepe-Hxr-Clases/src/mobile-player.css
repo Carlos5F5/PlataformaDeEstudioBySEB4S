@@ -1,0 +1,35 @@
+/* ===== ajustes de reproductor en móviles ===== */
+@media (max-width: 480px) {
+  /* botones + grandes y separados */
+  .plyr__controls button.plyr__control {
+    width: 38px;
+    height: 38px;
+    padding: 6px;
+  }
+
+  /* barra de progreso más alta y fácil de tocar */
+  .plyr__progress input[type='range'] {
+    height: 10px;
+  }
+
+  /* menú ⚙️ centrado, pegado arriba de los controles */
+  .plyr__menu__container {
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%);
+    bottom: 50px !important;
+  }
+
+  /* tooltip fuera (ahorra espacio) */
+  .plyr__tooltip {
+    display: none;
+  }
+}
+
+/* pantallas supercompactas (≤375 px) */
+@media (max-width: 375px) {
+  .plyr__controls button.plyr__control {
+    width: 34px;
+    height: 34px;
+  }
+}
