@@ -32,7 +32,7 @@ const CLOUDINARY_CLOUD_NAME = 'dywlzxrjx';
 const WriteUpsSection: React.FC = () => {
   const [store, setStore] = useState<StoredWU[]>([]);
   const [filter, setFilter] = useState<OS | 'All'>('All');
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
@@ -308,7 +308,7 @@ const WriteUpsSection: React.FC = () => {
       >
         Write-Ups&nbsp;
         <span style={{ fontSize: '1.3rem', color: '#4fa' }}>
-          {open ? '⌄' : '⌄'}
+          {open ? '⌄' : '   Toca aquí '}
         </span>
       </button>
 
