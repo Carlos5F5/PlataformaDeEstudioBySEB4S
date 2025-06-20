@@ -178,10 +178,6 @@ const WriteUpCard: React.FC<WriteUpCardProps> = ({
         </button>
       )}
  */}
-
-      {/* PRUEBA */}
-      
-      
       {/* Indicador de SO mejorado */}
       <div style={{
         position: 'absolute',

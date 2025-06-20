@@ -26,16 +26,7 @@ import logomalwaremodular from './assets/logos/logoscursosmodulares/malwaremodul
 import './mobile-player.css';
 
 // Tipo para las secciones
-export type Section = 'main' | 'modular' | 'writeups' | 'FORO' | 'STREAM';
-
-                                                // BOTONES DEL SLIDEBAR PARA LAS SECCINOES
-// Boton de FORO
-import ForoSecion from './components/ForoSection'
-
-// Boton para STREAM
-import StreaSection from './components/StreamSection'
-
-
+export type Section = 'main' | 'modular' | 'writeups';
 
 const App: React.FC = () => {
 
@@ -380,11 +371,6 @@ const App: React.FC = () => {
       case 'main':
       default:
         return renderMainSection();
-      case 'FORO':
-        return <ForoSecion/>
-      case 'STREAM':
-        return <StreaSection/>
-
     }
   };
 
@@ -862,7 +848,7 @@ const App: React.FC = () => {
       textShadow: '0 1px 3px #00ff9f'
     }}
   >
-    Hecho por <span style={{ color: '#00ff9f', fontWeight: '700' }}>SEB4S</span>
+    Hecho con por <span style={{ color: '#00ff9f', fontWeight: '700' }}>SEB4S</span>
   </h3>
 
   <p
