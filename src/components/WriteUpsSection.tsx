@@ -105,7 +105,7 @@ const WriteUpsSection: React.FC = () => {
     const validFiles = Array.from(files).filter(allowed);
 
     if (validFiles.length === 0) {
-      alert(`Solo se permiten archivos PDF de máximo ${MAX_SIZE_MB} MB pero puedes reducir su tamaño aquí: https://www.ilovepdf.com/compress_pdf`);
+      alert(`Solo se permiten archivos PDF de máximo ${MAX_SIZE_MB} MB, pero puedes comprimirlos para que pesen menos aquí ;)  : https://www.ilovepdf.com/compress_pdf`);
       return;
     }
 
@@ -209,7 +209,8 @@ const WriteUpsSection: React.FC = () => {
     }, 1000);
   };
 
-    const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files?.length) addFiles(files, selectedOS);
     e.target.value = '';
@@ -288,7 +289,8 @@ const WriteUpsSection: React.FC = () => {
     fontWeight: selectedOS === os ? '600' : '400',
   });
 
-    return (
+
+  return (
     <section style={{ marginTop: 80 }}>
       <button
         onClick={() => setOpen(o => !o)}
@@ -612,3 +614,4 @@ const WriteUpsSection: React.FC = () => {
 };
 
 export default WriteUpsSection;
+

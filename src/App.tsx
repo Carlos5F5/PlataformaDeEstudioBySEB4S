@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import CourseCard from './components/CourseCards';
 import EnhancedPlayer from './components/EnhancedPlayer';
+import WriteUpsSection from './components/WriteUpsSection';
 import SidebarButton from './components/SidebarButton';
 import ModularCourses from './components/ModularCourses';
 import type { ModularCourse } from './types';
@@ -24,18 +25,8 @@ import logomalwaremodular from './assets/logos/logoscursosmodulares/malwaremodul
 // Importando estilos 
 import './mobile-player.css';
 
-
-                                                                      // Secciones para los botones del SideBar
-//Sección WriteUps
-import WriteUpsSection from './components/WriteUpsSection';
-// Sección FORO
-import ForoSection from './components/ForoSection';
-// Sección Stream
-import StreamSection from './components/StreamSection';
-
-
 // Tipo para las secciones
-export type Section = 'main' | 'modular' | 'writeups' | 'FORO' | 'STREAM';
+export type Section = 'main' | 'modular' | 'writeups';
 
 const App: React.FC = () => {
 
@@ -380,11 +371,6 @@ const App: React.FC = () => {
       case 'main':
       default:
         return renderMainSection();
-      case 'FORO':
-  return <ForoSection/>
-  
-  case 'STREAM':
-  return <StreamSection/>
     }
   };
 
@@ -862,7 +848,7 @@ const App: React.FC = () => {
       textShadow: '0 1px 3px #00ff9f'
     }}
   >
-    Hecho por <span style={{ color: '#00ff9f', fontWeight: '700' }}>SEB4S</span>
+    Hecho con por <span style={{ color: '#00ff9f', fontWeight: '700' }}>SEB4S</span>
   </h3>
 
   <p
