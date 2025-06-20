@@ -9,7 +9,7 @@ type OS = 'Linux' | 'Windows';
 
 interface StoredWU {
   id: string;
-  file: File | null; // Permitir null para archivos cargados desde DB
+  file: File | null;
   os: OS;
   cloudinaryUrl: string;
   uploadedAt: string;
@@ -24,7 +24,8 @@ interface CloudinaryResponse {
   original_filename: string;
 }
 
-const MAX_SIZE_MB = 10;
+const MAX_SIZE_MB = 3;
+
 const CLOUDINARY_UPLOAD_PRESET = 'writeupsPublic';
 const CLOUDINARY_CLOUD_NAME = 'dywlzxrjx';
 
@@ -34,14 +35,13 @@ const WriteUpsSection: React.FC = () => {
   const [open, setOpen] = useState(true);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
+  const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
   const [selectedOS, setSelectedOS] = useState<OS>('Linux');
 
-  // Cargar write-ups desde Supabase al iniciar
   useEffect(() => {
     const fetchWriteUps = async () => {
       console.log('Cargando write-ups desde Supabase...');
-      
+
       try {
         const { data, error } = await supabase
           .from('writeups')
@@ -53,39 +53,29 @@ const WriteUpsSection: React.FC = () => {
           return;
         }
 
-        console.log('Datos recibidos de Supabase:', data);
-
         if (!data || data.length === 0) {
-          console.log('No hay write-ups en la base de datos');
           setStore([]);
           return;
         }
 
         const restored: StoredWU[] = [];
 
-        // Procesar cada write-up
         for (const wu of data) {
           try {
-            // Verificar que la URL de Cloudinary esté disponible
             const res = await fetch(wu.cloudinaryUrl, { method: 'HEAD' });
 
             if (res.ok) {
-              // Crear el objeto StoredWU sin File real, solo con los metadatos
               const restoredWU: StoredWU = {
                 id: wu.id,
-                file: null, // No necesitamos el File object para mostrar
+                file: null,
                 os: wu.os,
                 cloudinaryUrl: wu.cloudinaryUrl,
                 uploadedAt: wu.uploadedAt,
                 size: wu.size,
                 name: wu.name
               };
-              
               restored.push(restoredWU);
-              console.log(`Write-up restaurado: ${wu.name}`);
             } else {
-              // Si el archivo no existe en Cloudinary, eliminarlo de Supabase
-              console.warn(`Archivo ${wu.name} no encontrado en Cloudinary, eliminando de DB`);
               await supabase
                 .from('writeups')
                 .delete()
@@ -96,7 +86,6 @@ const WriteUpsSection: React.FC = () => {
           }
         }
 
-        console.log(`Se restauraron ${restored.length} write-ups`);
         setStore(restored);
       } catch (error) {
         console.error('Error general al cargar write-ups:', error);
@@ -106,55 +95,41 @@ const WriteUpsSection: React.FC = () => {
     fetchWriteUps();
   }, []);
 
-  const getFileType = (filename: string): string => {
-    const ext = filename.toLowerCase().split('.').pop();
-    return ext === 'pdf' ? 'application/pdf' : 'text/markdown';
-  };
-
   const allowed = (f: File): boolean => {
     const ext = f.name.toLowerCase().trim().split('.').pop();
     const sizeInMB = f.size / 1024 / 1024;
-    const sizeOk = sizeInMB <= MAX_SIZE_MB;
-    const validExtension = ext === 'pdf' || ext === 'md';
-    
-    return sizeOk && validExtension;
+    return ext === 'pdf' && sizeInMB <= MAX_SIZE_MB;
   };
 
-  // Función para agregar archivos de cloudinary y supabase
   const addFiles = async (files: FileList, os: OS) => {
     const validFiles = Array.from(files).filter(allowed);
-    
+
     if (validFiles.length === 0) {
-      alert('No hay archivos válidos para subir. Solo se permiten archivos .pdf y .md de máximo 10MB');
+      alert(`Solo se permiten archivos PDF de máximo ${MAX_SIZE_MB} MB, pero puedes comprimirlos para que pesen menos aquí ;)  : https://www.ilovepdf.com/compress_pdf`);
       return;
     }
 
-    console.log(`Iniciando subida de ${validFiles.length} archivos para ${os}`);
+    console.log(`Subiendo ${validFiles.length} archivos PDF para ${os}`);
     setUploading(true);
     const uploaded: StoredWU[] = [];
 
-    // Procesar archivos uno por uno
     for (const file of validFiles) {
       const fileKey = `${Date.now()}-${file.name}`;
       console.log(`Procesando archivo: ${file.name}`);
-      
+
       try {
-        // Crear FormData para Cloudinary
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
         formData.append('resource_type', 'raw');
 
-        // Simular progreso inicial
         setUploadProgress(prev => ({ ...prev, [fileKey]: 0 }));
 
-        // Subir a Cloudinary con seguimiento de progreso
         const xhr = new XMLHttpRequest();
-        
         const cloudinaryPromise = new Promise<CloudinaryResponse>((resolve, reject) => {
           xhr.upload.addEventListener('progress', (event) => {
             if (event.lengthComputable) {
-              const percentComplete = Math.round((event.loaded / event.total) * 80); // 80% para subida
+              const percentComplete = Math.round((event.loaded / event.total) * 80);
               setUploadProgress(prev => ({ ...prev, [fileKey]: percentComplete }));
             }
           });
@@ -164,11 +139,11 @@ const WriteUpsSection: React.FC = () => {
               try {
                 const data: CloudinaryResponse = JSON.parse(xhr.responseText);
                 resolve(data);
-              } catch (error) {
-                reject(new Error('Error al parsear respuesta de Cloudinary'));
+              } catch {
+                reject(new Error('Error al parsear respuesta Cloudinary'));
               }
             } else {
-              reject(new Error(`Error HTTP ${xhr.status}: ${xhr.responseText}`));
+              reject(new Error(`Error HTTP ${xhr.status}`));
             }
           });
 
@@ -181,57 +156,39 @@ const WriteUpsSection: React.FC = () => {
         });
 
         const cloudinaryData = await cloudinaryPromise;
-        console.log(`Archivo subido a Cloudinary: ${file.name}`, cloudinaryData);
-        
-        // Actualizar progreso a 90%
         setUploadProgress(prev => ({ ...prev, [fileKey]: 90 }));
 
-        if (cloudinaryData.secure_url) {
-          // Preparar datos para Supabase
-          const supabaseData = {
-            name: file.name,
-            os: os,
-            cloudinaryUrl: cloudinaryData.secure_url,
-            uploadedAt: new Date().toISOString(),
-            size: file.size
-          };
+        const supabaseData = {
+          name: file.name,
+          os: os,
+          cloudinaryUrl: cloudinaryData.secure_url,
+          uploadedAt: new Date().toISOString(),
+          size: file.size,
+        };
 
-          console.log('Insertando en Supabase:', supabaseData);
+        const { data: inserted, error } = await supabase
+          .from('writeups')
+          .insert([supabaseData])
+          .select()
+          .single();
 
-          // Insertar en Supabase
-          const { data: inserted, error } = await supabase
-            .from('writeups')
-            .insert([supabaseData])
-            .select()
-            .single();
+        if (error) throw new Error(`Supabase error: ${error.message}`);
 
-          if (error) {
-            console.error('Error insertando en Supabase:', error);
-            throw new Error(`Error en Supabase: ${error.message}`);
-          }
+        const newWriteUp: StoredWU = {
+          id: inserted.id,
+          file: file,
+          os: inserted.os,
+          cloudinaryUrl: inserted.cloudinaryUrl,
+          uploadedAt: inserted.uploadedAt,
+          size: inserted.size,
+          name: inserted.name,
+        };
 
-          console.log('Inserción exitosa en Supabase:', inserted);
-
-          // Crear objeto para el store local
-          const newWriteUp: StoredWU = {
-            id: inserted.id,
-            file: file, // Mantener el archivo original para archivos recién subidos
-            os: inserted.os,
-            cloudinaryUrl: inserted.cloudinaryUrl,
-            uploadedAt: inserted.uploadedAt,
-            size: inserted.size,
-            name: inserted.name
-          };
-
-          uploaded.push(newWriteUp);
-          
-          // Actualizar progreso a 100%
-          setUploadProgress(prev => ({ ...prev, [fileKey]: 100 }));
-          
-          console.log('Write-up agregado correctamente:', newWriteUp);
-        }
+        uploaded.push(newWriteUp);
+        setUploadProgress(prev => ({ ...prev, [fileKey]: 100 }));
+        console.log('✅ Subido:', newWriteUp);
       } catch (err) {
-        console.error(`Error subiendo archivo: ${file.name}`, err);
+        console.error(`Error subiendo ${file.name}:`, err);
         alert(`Error subiendo ${file.name}: ${err instanceof Error ? err.message : 'Error desconocido'}`);
         setUploadProgress(prev => {
           const newProgress = { ...prev };
@@ -241,44 +198,34 @@ const WriteUpsSection: React.FC = () => {
       }
     }
 
-    // Actualizar store con todos los archivos subidos
     if (uploaded.length > 0) {
-      setStore(prev => {
-        const newStore = [...uploaded, ...prev];
-        console.log('Store actualizado con:', newStore.length, 'archivos');
-        return newStore;
-      });
-      
-      console.log(`✅ Subida completada: ${uploaded.length} archivos procesados exitosamente`);
+      setStore(prev => [...uploaded, ...prev]);
+      console.log(`✅ Completado: ${uploaded.length} archivos`);
     }
 
-    // Limpiar progreso después de un breve delay
     setTimeout(() => {
       setUploadProgress({});
       setUploading(false);
     }, 1000);
   };
 
+
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files?.length) {
-      addFiles(files, selectedOS);
-    }
+    if (files?.length) addFiles(files, selectedOS);
     e.target.value = '';
   };
 
   const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setDragOver(false);
-    if (!e.dataTransfer.files.length) return;
-    addFiles(e.dataTransfer.files, selectedOS);
+    if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files, selectedOS);
   };
 
   const removeWriteUp = async (id: string) => {
     try {
       console.log(`Eliminando write-up con ID: ${id}`);
-      
-      // Eliminar de Supabase
+
       const { error } = await supabase
         .from('writeups')
         .delete()
@@ -290,7 +237,6 @@ const WriteUpsSection: React.FC = () => {
         return;
       }
 
-      // Eliminar del store local
       setStore(prev => prev.filter(wu => wu.id !== id));
       console.log('Write-up eliminado correctamente');
     } catch (err) {
@@ -343,6 +289,7 @@ const WriteUpsSection: React.FC = () => {
     fontWeight: selectedOS === os ? '600' : '400',
   });
 
+
   return (
     <section style={{ marginTop: 80 }}>
       <button
@@ -373,7 +320,6 @@ const WriteUpsSection: React.FC = () => {
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.35 }}
           >
-            {/* Panel de control mejorado */}
             <div
               style={{
                 backdropFilter: 'blur(8px)',
@@ -384,7 +330,6 @@ const WriteUpsSection: React.FC = () => {
                 border: '1px solid rgba(255,255,255,0.1)',
               }}
             >
-              {/* Selección de OS */}
               <div style={{ marginBottom: 16 }}>
                 <h4 style={{ 
                   color: '#fff', 
@@ -418,7 +363,6 @@ const WriteUpsSection: React.FC = () => {
                 </div>
               </div>
 
-              {/* Controles de archivo y filtrado */}
               <div style={{ 
                 display: 'flex', 
                 gap: 12, 
@@ -437,7 +381,7 @@ const WriteUpsSection: React.FC = () => {
                   {uploading ? 'Subiendo...' : `Subir para ${selectedOS}`}
                   <input
                     type="file"
-                    accept=".pdf,.md"
+                    accept=".pdf"
                     multiple
                     onChange={handleInput}
                     disabled={uploading}
@@ -457,7 +401,6 @@ const WriteUpsSection: React.FC = () => {
               </div>
             </div>
 
-            {/* Indicador de progreso */}
             {uploading && Object.keys(uploadProgress).length > 0 && (
               <motion.div 
                 initial={{ opacity: 0, y: -10 }}
@@ -504,7 +447,6 @@ const WriteUpsSection: React.FC = () => {
               </motion.div>
             )}
 
-            {/* Área de drag & drop */}
             <div
               onDragOver={e => {
                 e.preventDefault();
@@ -531,13 +473,11 @@ const WriteUpsSection: React.FC = () => {
                 ? ' Subiendo archivos...'
                 : dragOver
                 ? ` Suelta los archivos para ${selectedOS}`
-                : `Arrastra archivos aquí (.pdf o .md, máx ${MAX_SIZE_MB} MB)\n${selectedOS} seleccionado, POR FAVOR NO MEZCLES SOs`}
+                : `Arrastra archivos aquí (.pdf, máx ${MAX_SIZE_MB} MB)\n${selectedOS} seleccionado`}
             </div>
 
-            {/* Grid de archivos con separación por OS */}
             {filter === 'All' && store.length > 0 ? (
               <div>
-                {/* Sección Linux */}
                 {linuxCount > 0 && (
                   <div style={{ marginBottom: 40 }}>
                     <h3 style={{ 
@@ -573,7 +513,6 @@ const WriteUpsSection: React.FC = () => {
                   </div>
                 )}
 
-                {/* Sección Windows */}
                 {windowsCount > 0 && (
                   <div>
                     <h3 style={{ 
@@ -642,7 +581,6 @@ const WriteUpsSection: React.FC = () => {
               </div>
             )}
 
-            {/* Información estadística */}
             {store.length > 0 && (
               <motion.div 
                 initial={{ opacity: 0 }}
@@ -676,3 +614,4 @@ const WriteUpsSection: React.FC = () => {
 };
 
 export default WriteUpsSection;
+
